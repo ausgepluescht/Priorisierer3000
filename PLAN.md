@@ -52,7 +52,7 @@ Optimiert für einen 16:9-Bildschirm, scrollbar, mit Projekten als Kategorien.
 ```json
 {
   "app": "Priorisierer3000",
-  "version": 1,
+  "version": 2,
   "settings": { "capacity": 20 },
   "projects": [ { "id": "p1", "name": "Tagesgeschäft", "color": "#31497e" } ],
   "tasks": [
@@ -60,11 +60,17 @@ Optimiert für einen 16:9-Bildschirm, scrollbar, mit Projekten als Kategorien.
       "project": "p1", "urgency": "red", "points": 8,
       "deadline": "2026-11-11", "done": false, "doneAt": null, "wasOneThing": false }
   ],
+  "waits": [
+    { "id": "w1", "taskId": "a1b2c3", "project": "p1",
+      "who": "Controlling, Sabine", "what": "Ist-Zahlen Q3 je Kostenstelle",
+      "askedAt": "2026-11-05", "dueAt": "2026-11-09",
+      "status": "open", "response": "", "receivedAt": null }
+  ],
   "updated": "2026-11-08T10:00:00.000Z"
 }
 ```
 
-Die Reihenfolge im Array `tasks` ist die Priorität.
+Die Reihenfolge im Array `tasks` ist die Priorität. Warte-Einträge hängen immer an einem Projekt und optional an einer Aufgabe (`taskId`).
 
 ## 5. Was der Prototyp v0.1 schon kann
 
@@ -78,19 +84,29 @@ Die Reihenfolge im Array `tasks` ist die Priorität.
 
 ### Neu in v0.2
 
-- **The One Thing**: Die oberste Aufgabe steht groß als Zitat über der Liste, mit eigenem Erledigt-Knopf
+- **The One Thing**: Die oberste Aufgabe steht groß über der Liste, mit eigenem Erledigt-Knopf
 - Zähler „heute erledigt“ und **One-Thing-Serie** (wie viele Tage am Stück die One Thing erledigt wurde)
 - **Deadline** je Streifen, Karte „Nächste Deadlines“ mit Warnung, wenn etwas bald fällig ist, aber unter der Kapazitätsgrenze liegt
 - **Erledigt-Haken** mit Konfetti; bei der One Thing große Feier. Archiv-Tab „✓ Erledigt“ mit Wiederherstellen
 - Design-Review: ein gemeinsames Raster für Kopfzeile und Streifen, alle Knöpfe gleich groß und gleichmäßig verteilt, Zahlen in Inter
 
+### Neu in v0.3
+
+- **Fokus-Frage aus dem Buch** über der One-Thing-Kachel: „What’s the ONE Thing I can do such that by doing it everything else will be easier or unnecessary?“ (Gary Keller & Jay Papasan, *The ONE Thing*), darunter die deutsche Übersetzung
+- **Warte auf**
+  - Klappliste unter jeder Aufgabe: Wer, was, angefragt am, Rückmeldung bis (Stichtag), Rückmeldung / Ergebnis, Haken „erhalten“
+  - Eigene Ansicht „Warte auf“ (Umschalter oben rechts) mit Filter Offen, Überfällig, Erhalten, Alle; Einträge lassen sich einem Projekt und optional einer Aufgabe zuordnen
+  - Überfällige Rückmeldungen werden rot, im Streifen steht „nachfassen“, die Seitenleiste zeigt die nächsten Stichtage
+- **Projektübersicht** als Dialog: anlegen, umbenennen, Farbe wählen, Reihenfolge der Tabs, löschen (mit Wahl: Aufgaben verschieben, ohne Projekt behalten oder mitlöschen)
+- Weniger Emojis: Menü, Meldungen und Hinweise sind jetzt reiner Text, Symbole nur noch als schlichte Linien-Icons
+
 ## 6. Iterationsplan
 
 1. ~~Mockup bewerten~~ ✓
 2. ~~Erledigt-Ablage, Deadline, One Thing~~ ✓ (v0.2)
-3. **Projekte verwalten**: Farbe wählen, löschen, archivieren, Reihenfolge der Tabs
-4. **Fokusblock für die One Thing**: Zeitfenster und Timer direkt im Banner
-5. **„Wartet auf …“**: Person und Nachfass-Datum für lila Streifen
+3. ~~Projekte verwalten~~ ✓ (v0.3)
+4. ~~„Warte auf“ mit Stichtag und Rückmeldung~~ ✓ (v0.3)
+5. **Fokusblock für die One Thing**: Zeitfenster und Timer direkt im Banner
 6. **Priorisierungshilfen**
    - Zweite Achse **Wert / Impact** (ebenfalls Fibonacci)
    - Vorschlag nach **WSJF** (Wert + Dringlichkeit geteilt durch Aufwand) als Knopf „Vorschlag anzeigen“, du entscheidest final per Drag & Drop

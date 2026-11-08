@@ -29,27 +29,34 @@
   --quote:"Lora",Georgia,"Times New Roman",serif;
 
   /* Raster eines Streifens – alle Maße an einer Stelle */
-  --pad:14px;                 /* Innenabstand jeder Zelle */
-  --pt:32px;  --pt-gap:6px;   /* Story-Point-Knöpfe */
-  --dot:22px; --dot-gap:10px; /* Ampel-Punkte */
+  --pad:14px;
+  --pt:32px;  --pt-gap:6px;
+  --dot:22px; --dot-gap:10px;
   --c-handle:28px; --c-marker:8px; --c-rank:68px;
   --c-urg:  calc(4*var(--dot) + 3*var(--dot-gap) + 2*var(--pad));
   --c-pts:  calc(7*var(--pt)  + 6*var(--pt-gap)  + 2*var(--pad));
   --c-dl:136px; --c-done:58px; --c-del:42px;
   --cols: var(--c-handle) var(--c-marker) var(--c-rank) minmax(220px,24%) minmax(120px,1fr)
           var(--c-urg) var(--c-pts) var(--c-dl) var(--c-done) var(--c-del);
+
+  /* Raster der Warte-Einträge */
+  --w-panel: 44px minmax(130px,170px) minmax(160px,1.3fr) 124px 150px minmax(160px,1fr) 40px;
+  --w-view:  44px minmax(130px,180px) minmax(180px,1.3fr) 230px 124px 150px minmax(180px,1fr) 40px;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0; background:var(--bg); color:var(--ink);
   font-family:var(--font); font-size:14px; line-height:1.4;
-  font-feature-settings:"tnum" 1;              /* gleich breite Ziffern, gleiche Schrift */
+  font-feature-settings:"tnum" 1;
   display:flex; flex-direction:column; overflow:hidden;
   -webkit-font-smoothing:antialiased;
 }
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
+button[disabled]{cursor:default}
+svg.i{width:14px;height:14px;flex:none}
+[hidden]{display:none !important}
 
 /* ---------- Kopfzeile ---------- */
 .topbar{
@@ -75,12 +82,19 @@ button{cursor:pointer}
 
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px; height:36px;
-  border-radius:8px; padding:0 14px; font-weight:600; font-size:13px; border:1px solid transparent;
+  border-radius:8px; padding:0 14px; font-weight:600; font-size:13px; border:1px solid transparent; white-space:nowrap;
 }
 .btn-primary{background:var(--amber); color:var(--navy)}
 .btn-primary:hover{filter:brightness(1.06)}
 .btn-ghost{background:transparent; color:#fff; border-color:rgba(255,255,255,.25)}
 .btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-navy{background:var(--navy); color:#fff}
+.btn-navy:hover{filter:brightness(1.15)}
+.btn-plain{background:#fff; border-color:var(--line); color:var(--ink)}
+.btn-plain:hover{border-color:var(--line-strong); background:var(--surface-2)}
+.btn-danger{background:var(--red); color:#fff}
+.btn-danger:hover{filter:brightness(1.05)}
+.btn-sm{height:32px; padding:0 12px}
 
 .menu-wrap{position:relative}
 .menu{
@@ -89,17 +103,13 @@ button{cursor:pointer}
   padding:6px; display:none;
 }
 .menu.open{display:block}
-.menu button{
-  display:flex; width:100%; text-align:left; gap:10px; align-items:flex-start;
-  background:none; border:0; padding:9px 10px; border-radius:7px;
-}
+.menu button{display:block; width:100%; text-align:left; background:none; border:0; padding:9px 12px; border-radius:7px}
 .menu button:hover{background:var(--surface-2)}
-.menu button span{display:block}
-.menu .sub{font-size:12px;color:var(--muted)}
+.menu .sub{display:block; font-size:12px;color:var(--muted)}
 .menu hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
 .menu button[disabled]{opacity:.45;cursor:not-allowed}
 
-/* ---------- Projekt-Tabs ---------- */
+/* ---------- Tabs: Projekte + Ansicht ---------- */
 .tabs{
   flex:none; display:flex; align-items:center; gap:8px; padding:10px 24px;
   background:var(--surface); border-bottom:1px solid var(--line); overflow-x:auto;
@@ -109,20 +119,39 @@ button{cursor:pointer}
   border:1px solid var(--line); background:var(--surface); border-radius:999px;
   padding:0 14px; font-weight:500;
 }
+.tabs > *{flex-shrink:0}
 .tab:hover{border-color:var(--line-strong); background:var(--surface-2)}
 .tab .dot{width:10px;height:10px;border-radius:3px;background:var(--c,#8aa0ad)}
 .tab .count{font-size:11.5px;color:var(--muted)}
 .tab.active{background:var(--navy); border-color:var(--navy); color:#fff}
 .tab.active .count{color:#a9c6d5}
 .tab.active .dot{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
-.tab.add{border-style:dashed;color:var(--muted)}
-.tab.done-tab{margin-left:auto; color:var(--green); border-color:color-mix(in srgb,var(--green) 35%,var(--line))}
-.tab.done-tab.active{background:var(--green); border-color:var(--green); color:#fff}
-.tab.done-tab.active .count{color:#d4f0de}
+.tab.manage{border-style:dashed;color:var(--muted)}
+.tab.manage:hover{color:var(--ink)}
+
+.seg{flex:none; display:inline-flex; gap:2px; padding:3px; background:var(--surface-2); border:1px solid var(--line); border-radius:999px}
+.tabs .seg{margin-left:auto}
+.seg button{
+  height:28px; border:0; background:none; border-radius:999px; padding:0 12px;
+  display:inline-flex; align-items:center; gap:7px; font-weight:500; color:var(--muted); white-space:nowrap;
+}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,40,60,.14)}
+.badge{min-width:20px; height:18px; padding:0 6px; border-radius:9px; background:var(--line); color:var(--ink);
+  font-size:11px; font-weight:600; display:inline-grid; place-items:center}
+.badge.alert{background:var(--red); color:#fff}
+.badge.good{background:#dcf1e3; color:#1b6b3a}
 
 /* ---------- Hauptbereich ---------- */
-.main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:20px; padding:16px 24px 20px}
-.left{min-height:0; display:flex; flex-direction:column; gap:14px}
+.main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:20px; padding:14px 24px 20px}
+.left{min-height:0; display:flex; flex-direction:column; gap:12px}
+
+/* ---------- Fokus-Frage aus „The ONE Thing“ ---------- */
+.book-quote{flex:none; margin:0; display:flex; gap:12px; align-items:flex-start; padding:0 4px}
+.book-quote .mark{font-family:var(--quote); font-size:44px; line-height:.9; color:var(--amber); margin-top:-2px}
+.bq-text{margin:0; font-family:var(--quote); font-style:italic; font-weight:500; font-size:17px; color:var(--navy); line-height:1.35}
+.bq-sub{margin-top:2px; font-size:12px; color:var(--muted)}
+.bq-sub i{font-family:var(--quote)}
 
 /* ---------- THE ONE THING ---------- */
 .onething{
@@ -136,28 +165,23 @@ button{cursor:pointer}
 @keyframes otIn{from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:none}}
 .ot-bar{background:var(--otc)}
 .ot-body{padding:14px 22px 14px 20px; min-width:0}
-.ot-label{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
 .ot-kicker{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--navy)}
 .ot-kicker .star{color:var(--amber)}
-.ot-question{font-family:var(--quote); font-style:italic; font-size:13px; color:var(--muted)}
-.ot-quote{
-  margin:6px 0 0; font-family:var(--quote); font-style:italic; font-weight:600;
-  font-size:27px; line-height:1.25; color:var(--navy);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-.ot-quote::before{content:"„"; color:var(--otc)}
-.ot-quote::after{content:"“"; color:var(--otc)}
-.ot-quote.empty::before,.ot-quote.empty::after{content:none}
+.ot-title{margin-top:4px; font-weight:700; font-size:24px; line-height:1.25; letter-spacing:-.01em; color:var(--navy);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ot-title.empty{color:var(--muted); font-weight:600}
 .ot-meta{margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
 .chip{display:inline-flex; align-items:center; gap:6px; height:24px; padding:0 10px; border-radius:999px;
-  background:var(--surface-2); border:1px solid var(--line); font-size:12px; color:var(--muted)}
+  background:var(--surface-2); border:1px solid var(--line); font-size:12px; color:var(--muted); white-space:nowrap}
 .chip b{color:var(--ink); font-weight:600}
 .chip .sw{width:8px;height:8px;border-radius:2px;background:var(--c)}
 .chip.overdue{background:#fff0f2; border-color:#ffd0d7; color:#a3283b}
 .chip.soon{background:#fff6e5; border-color:#ffe0a3; color:#8a5a00}
+.chip.wait{background:#f2eff8; border-color:#ddd5ec; color:var(--violet)}
 .ot-side{display:flex; align-items:center; gap:22px; padding:14px 22px}
 .ot-stats{display:flex; flex-direction:column; gap:6px; font-size:12.5px; color:var(--muted); white-space:nowrap}
-.ot-stats b{color:var(--ink); font-size:15px; font-weight:700; margin-right:2px}
+.ot-stats span{display:flex; align-items:center; gap:6px}
+.ot-stats b{color:var(--ink); font-size:15px; font-weight:700}
 .ot-done{
   height:48px; padding:0 22px; border-radius:10px; border:0;
   background:var(--green); color:#fff; font-weight:700; font-size:15px;
@@ -167,29 +191,29 @@ button{cursor:pointer}
 .ot-done:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(35,139,74,.45)}
 .ot-done:active{transform:translateY(1px)}
 .ot-done svg{width:20px;height:20px}
-.ot-done[disabled]{opacity:.4; cursor:default; box-shadow:none; transform:none}
+.ot-done[disabled]{opacity:.4; box-shadow:none; transform:none}
 
 /* ---------- Board ---------- */
 .board{flex:1; min-height:0; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow)}
 .colhead{
   display:grid; grid-template-columns:var(--cols); align-items:center;
-  padding:0 15px; height:38px; flex:none;               /* 15 = 14 Listenabstand + 1 Streifenrahmen */
+  padding:0 15px; height:38px; flex:none;
   font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
   border-bottom:1px solid var(--line);
 }
 .colhead > div{padding:0 var(--pad); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.colhead .c{text-align:center}
 .colhead > div:empty{padding:0}
+.colhead .c{text-align:center}
 .list{flex:1; min-height:0; overflow-y:auto; padding:12px 14px 24px; display:flex; flex-direction:column; gap:8px}
 
 /* ---------- Flugstreifen ---------- */
 .strip{
   --urg:var(--green);
   flex:none; position:relative;
-  display:grid; grid-template-columns:var(--cols); align-items:stretch;
-  min-height:68px; max-height:200px; background:var(--surface);
+  display:grid; grid-template-columns:var(--cols); grid-template-rows:minmax(66px,auto) auto; align-items:stretch;
+  background:var(--surface);
   border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
-  transition:box-shadow .15s, transform .15s, opacity .15s, border-color .15s;
+  transition:box-shadow .15s, opacity .15s, border-color .15s;
 }
 .strip:hover{border-color:var(--line-strong)}
 .strip:focus-within{border-color:#9db3c2}
@@ -198,6 +222,7 @@ button{cursor:pointer}
 .strip.over-cap:hover,.strip.over-cap:focus-within{opacity:1}
 
 .handle{
+  grid-row:1 / span 2;
   display:flex;align-items:center;justify-content:center; cursor:grab;
   color:#a3b2bd; font-size:13px; letter-spacing:-2px; user-select:none;
   border-radius:7px 0 0 7px;
@@ -205,7 +230,7 @@ button{cursor:pointer}
 .handle:hover{color:var(--navy); background:var(--surface-2)}
 .handle:active{cursor:grabbing}
 .handle:focus-visible{outline:2px solid var(--navy); outline-offset:-2px}
-.marker{background:var(--urg); cursor:pointer}
+.marker{grid-row:1 / span 2; background:var(--urg); cursor:pointer}
 .marker:hover{filter:brightness(1.08)}
 
 .rank{
@@ -226,15 +251,28 @@ button{cursor:pointer}
 [contenteditable]:empty::before{content:attr(data-ph); color:var(--faint); font-weight:400}
 [contenteditable]:focus{background:#f1f6f9; box-shadow:0 0 0 4px #f1f6f9}
 
-.proj{display:flex;align-items:center;gap:6px;margin-top:4px}
+.proj{display:flex;align-items:center;gap:6px;margin-top:4px; flex-wrap:wrap; row-gap:2px}
 .proj .pdot{width:8px;height:8px;border-radius:2px;background:var(--pc,#8aa0ad);flex:none}
-.proj select{
+select.flat{
   appearance:none; -webkit-appearance:none; field-sizing:content; max-width:100%;
   border:0; background:transparent no-repeat right 1px center / 9px 9px
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 3.5 5 7l3.5-3.5' fill='none' stroke='%235d6d79' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
   font-size:12px; color:var(--muted); padding:0 14px 0 0; cursor:pointer; text-overflow:ellipsis;
 }
-.proj select:hover{color:var(--ink)}
+select.flat:hover{color:var(--ink)}
+
+/* Warte-Chip im Streifen */
+.wchip{
+  display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 8px; margin-left:4px;
+  border-radius:999px; border:1px solid transparent; background:none; font-size:11.5px; font-weight:500; color:var(--muted);
+}
+.wchip .chev{font-size:9px; transition:transform .15s}
+.wchip.open .chev{transform:rotate(180deg)}
+.wchip:hover{border-color:var(--line); background:var(--surface-2); color:var(--ink)}
+.wchip.active{background:#f2eff8; border-color:#ddd5ec; color:var(--violet)}
+.wchip.alert{background:#fff0f2; border-color:#ffd0d7; color:#c0263f}
+.wchip.ghost{opacity:0}
+.strip:hover .wchip.ghost,.wchip.ghost.open,.wchip.ghost:focus-visible{opacity:1}
 
 /* Ampel */
 .urg{flex-direction:row; align-items:center; justify-content:center; gap:var(--dot-gap)}
@@ -255,28 +293,30 @@ button{cursor:pointer}
 .pts button:hover{border-color:var(--pc); color:var(--ink); background:color-mix(in srgb, var(--pc) 12%, #fff)}
 .pts button.on{background:var(--pc); border-color:var(--pc); color:var(--pt-ink,#fff); font-weight:700}
 
-/* Deadline */
-.dl{position:relative; align-items:center}
-.dl-btn{
+/* Datumsfeld (Deadline, Stichtag, Angefragt) */
+.cell.dl{align-items:stretch; padding-left:8px; padding-right:8px}
+.df{position:relative; width:100%}
+.df-btn{
   width:100%; height:44px; border-radius:8px; border:1px solid transparent; background:none;
   display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:0 6px;
 }
-.dl-btn:hover{background:var(--surface-2); border-color:var(--line)}
-.dl-date{font-weight:600; font-size:13.5px; color:var(--ink); white-space:nowrap}
-.dl-rel{font-size:11.5px; color:var(--muted); white-space:nowrap}
-.dl-empty{font-size:12.5px; color:var(--faint); border:1px dashed var(--line-strong); border-radius:6px; padding:3px 10px; white-space:nowrap}
-.dl-btn:hover .dl-empty{color:var(--muted)}
-.dl.week .dl-rel{color:#8a5a00}
-.dl.soon .dl-rel{color:#c25a00; font-weight:600}
-.dl.soon .dl-date{color:#c25a00}
-.dl.overdue .dl-rel,.dl.overdue .dl-date{color:#d0324b; font-weight:700}
-.dl-input{position:absolute; left:var(--pad); bottom:6px; width:1px; height:1px; opacity:0; pointer-events:none; border:0; padding:0}
-.dl-clear{
-  position:absolute; top:5px; right:6px; width:18px; height:18px; border-radius:50%; border:0;
+.df-btn:hover{background:var(--surface-2); border-color:var(--line)}
+.df-date{font-weight:600; font-size:13.5px; color:var(--ink); white-space:nowrap}
+.df-rel{font-size:11.5px; color:var(--muted); white-space:nowrap}
+.df-empty{font-size:12.5px; color:var(--faint); border:1px dashed var(--line-strong); border-radius:6px; padding:3px 10px; white-space:nowrap}
+.df-btn:hover .df-empty{color:var(--muted)}
+.df.week .df-rel{color:#8a5a00}
+.df.soon .df-rel{color:#c25a00; font-weight:600}
+.df.soon .df-date{color:#c25a00}
+.df.overdue .df-rel,.df.overdue .df-date{color:#d0324b; font-weight:700}
+.df.done .df-rel{color:var(--green); font-weight:600}
+.df-input{position:absolute; left:8px; bottom:4px; width:1px; height:1px; opacity:0; pointer-events:none; border:0; padding:0}
+.df-clear{
+  position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%; border:0;
   background:var(--surface-2); color:var(--muted); font-size:12px; line-height:1; padding:0; opacity:0; transition:opacity .15s;
 }
-.dl:hover .dl-clear{opacity:1}
-.dl-clear:hover{background:#fde8eb; color:var(--red)}
+.df:hover .df-clear{opacity:1}
+.df-clear:hover{background:#fde8eb; color:var(--red)}
 
 /* Erledigt-Haken + Löschen */
 .done-cell,.act{display:flex; align-items:center; justify-content:center}
@@ -291,29 +331,83 @@ button{cursor:pointer}
 @keyframes pop{0%{transform:scale(1)} 40%{transform:scale(1.35); background:var(--green); color:#fff} 100%{transform:scale(1.1); background:var(--green); color:#fff}}
 .restore{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:16px;padding:0}
 .restore:hover{border-color:var(--navy);color:var(--navy)}
-.del{
+.del,.w-del{
   width:28px;height:28px;border-radius:7px;border:0;background:none;color:#b3c0c9;font-size:18px;line-height:1;padding:0;
-  opacity:.0; transition:opacity .15s, background .15s, color .15s;
+  opacity:0; transition:opacity .15s, background .15s, color .15s;
 }
-.strip:hover .del,.del:focus-visible{opacity:1}
-.del:hover{background:#fde8eb;color:var(--red)}
+.strip:hover > .act .del,.del:focus-visible,.wrow:hover .w-del,.w-del:focus-visible{opacity:1}
+.del:hover,.w-del:hover{background:#fde8eb;color:var(--red)}
 
 /* Abschluss-Animation */
-.strip.completing{animation:complete .75s cubic-bezier(.5,0,.3,1) forwards; pointer-events:none}
+.strip.completing{animation:complete .75s cubic-bezier(.5,0,.3,1) forwards; pointer-events:none; overflow:hidden}
 @keyframes complete{
-  0%  {max-height:200px}
-  30% {background:#e6f6ec; border-color:var(--green); transform:scale(1.01)}
-  55% {opacity:1; transform:translateX(0); max-height:200px; min-height:68px}
-  100%{opacity:0; transform:translateX(80px); max-height:0; min-height:0; margin-bottom:-8px; border-width:0}
+  0%  {max-height:var(--h)}
+  30% {background:#e6f6ec; border-color:var(--green)}
+  55% {opacity:1; transform:translateX(0); max-height:var(--h)}
+  100%{opacity:0; transform:translateX(80px); max-height:0; margin-bottom:-8px; border-width:0}
 }
 
 /* Erledigt-Ansicht */
 .strip.is-done{background:var(--surface-2)}
 .strip.is-done .title{text-decoration:line-through; text-decoration-color:var(--faint); color:var(--muted)}
-.strip.is-done .urg,.strip.is-done .pts,.strip.is-done .dl,.strip.is-done .marker,.strip.is-done .proj select{pointer-events:none}
+.strip.is-done .urg,.strip.is-done .pts,.strip.is-done .dl,.strip.is-done .marker{pointer-events:none}
 .strip.is-done .urg,.strip.is-done .pts,.strip.is-done .dl{opacity:.5}
 .strip.is-done .rank{color:var(--green); cursor:default; background:#eaf6ee}
 .strip.is-done .handle{cursor:default}
+
+/* ---------- Warte-Einträge ---------- */
+.wait-panel{
+  grid-column:3 / -1; grid-row:2;
+  border-top:1px dashed var(--line-strong); background:var(--surface-2);
+  padding:6px 12px 10px; border-radius:0 0 8px 0;
+}
+.wrow{
+  --wc:var(--violet);
+  display:grid; align-items:center; min-height:46px;
+  border-bottom:1px solid var(--line); box-shadow:inset 3px 0 0 var(--wc);
+}
+.wrow > span{padding:0 6px; min-width:0}
+.wrow.panel{grid-template-columns:var(--w-panel)}
+.wrow.view{grid-template-columns:var(--w-view); background:#fff}
+.wrow.head{min-height:30px; box-shadow:none; font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.wrow.head > span{padding:0 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.wrow.view.head{background:none; padding:0 15px; flex:none}
+.wrow .df-btn{height:38px}
+.wrow.rec .w-in:not(.resp){color:var(--muted)}
+.wrow.rec .resp{color:var(--ink); font-weight:500}
+.wc{display:flex; justify-content:center}
+.w-check{
+  width:26px; height:26px; border-radius:50%; border:2px solid var(--wc); background:#fff; color:transparent;
+  display:grid; place-items:center; padding:0; transition:background .15s, color .15s;
+}
+.w-check svg{width:14px;height:14px}
+.w-check:hover{color:var(--green); border-color:var(--green)}
+.w-check.on{background:var(--green); border-color:var(--green); color:#fff}
+.w-in{
+  width:100%; height:32px; border:1px solid transparent; border-radius:6px; background:transparent; padding:0 8px;
+  text-overflow:ellipsis;
+}
+.w-in::placeholder{color:var(--faint)}
+.w-in:hover{border-color:var(--line); background:#fff}
+.w-in:focus{outline:none; border-color:#9db3c2; background:#fff}
+.w-in.who{font-weight:600}
+.wx{display:flex; justify-content:center}
+.w-link{display:flex; flex-direction:column; gap:2px; padding:4px 14px !important}
+.w-link .ln{display:flex; align-items:center; gap:6px; min-width:0}
+.w-link .pdot{width:8px;height:8px;border-radius:2px;background:var(--pc,#8aa0ad);flex:none}
+.w-link select.flat{font-size:12.5px}
+.w-link .ln.task select{color:var(--ink)}
+.w-add{
+  margin-top:8px; height:30px; padding:0 12px; border-radius:7px; border:1px dashed var(--line-strong);
+  background:#fff; color:var(--muted); font-size:12.5px; font-weight:500;
+}
+.w-add:hover{color:var(--ink); border-color:var(--navy)}
+.w-empty{padding:10px 14px; font-size:12.5px; color:var(--muted)}
+
+.wtool{flex:none; display:flex; align-items:center; gap:12px; padding:10px 15px; border-bottom:1px solid var(--line)}
+.wtool .title-s{font-weight:700; color:var(--navy); margin-right:6px}
+.wgroup{flex:none; margin:8px 0 0; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.list .wrow.view{flex:none; border:1px solid var(--line); border-radius:8px; box-shadow:inset 4px 0 0 var(--wc), var(--shadow)}
 
 /* Kapazitätsgrenze */
 .capline{
@@ -329,7 +423,9 @@ button{cursor:pointer}
 /* ---------- Seitenleiste ---------- */
 .side{min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding-right:2px}
 .card{flex:none; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
-.card h3{margin:0 0 12px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.card h3{margin:0 0 12px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; display:flex; align-items:center}
+.card h3 .lnk{margin-left:auto; border:0; background:none; padding:0; font-size:11.5px; letter-spacing:0; text-transform:none; font-weight:600; color:var(--indigo)}
+.card h3 .lnk:hover{text-decoration:underline}
 
 .cap-in{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .cap-in input{width:64px; height:32px; padding:0 8px; border:1px solid var(--line); border-radius:6px; font-weight:600; color:var(--ink); text-align:right}
@@ -343,18 +439,63 @@ button{cursor:pointer}
 .row .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
 .row .n{color:var(--muted);font-size:12px;text-align:right}
 .row .p{font-size:12.5px;font-weight:700;text-align:right}
-.dlrow{display:grid; grid-template-columns:62px minmax(0,1fr) auto; gap:10px; align-items:center; font-size:13px}
+.dlrow{display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:10px; align-items:center; font-size:13px}
 .dlrow .d{font-weight:600; font-size:12px; text-align:center; border-radius:6px; padding:3px 0; background:var(--surface-2); border:1px solid var(--line)}
 .dlrow .t{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.dlrow .t b{font-weight:600}
 .dlrow .r{font-size:11.5px; color:var(--muted); white-space:nowrap}
 .dlrow.soon .d{background:#fff6e5; border-color:#ffe0a3; color:#8a5a00}
 .dlrow.overdue .d{background:#fff0f2; border-color:#ffd0d7; color:#a3283b}
 .dlrow.overdue .r{color:#d0324b; font-weight:600}
+button.dlrow{border:0; background:none; padding:0; text-align:left; width:100%}
+button.dlrow:hover .t{color:var(--indigo)}
 .warn{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:12.5px; background:#fff1f3; color:#a3283b; border:1px solid #ffd0d7}
 .ok{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:12.5px; background:#eef8f1; color:#1b6b3a; border:1px solid #cbe9d5}
 
 .keys{font-size:12.5px;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:7px 12px;align-items:center}
 kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--ink);white-space:nowrap}
+
+/* ---------- Projektübersicht (Dialog) ---------- */
+.dlg{
+  width:min(900px, 94vw); max-height:86vh; border:0; border-radius:14px; padding:0;
+  box-shadow:0 30px 80px rgba(0,30,50,.35); color:var(--ink);
+}
+.dlg::backdrop{background:rgba(0,30,45,.45)}
+.dlg-head{display:flex; align-items:center; gap:12px; padding:18px 22px 4px}
+.dlg-head h2{margin:0; font-size:18px; color:var(--navy)}
+.dlg-sub{padding:0 22px 14px; font-size:13px; color:var(--muted); border-bottom:1px solid var(--line)}
+.icon-btn{margin-left:auto; width:32px; height:32px; border-radius:8px; border:0; background:none; font-size:20px; color:var(--muted)}
+.icon-btn:hover{background:var(--surface-2); color:var(--ink)}
+.pm-body{padding:8px 22px 4px; overflow:auto; max-height:calc(86vh - 190px)}
+.pm-grid{display:grid; grid-template-columns:44px minmax(180px,1fr) 70px 70px 84px 80px 84px 44px; align-items:center}
+.pm-head{font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); height:32px}
+.pm-head > span{padding:0 8px; white-space:nowrap}
+.pm-row{min-height:50px; border-top:1px solid var(--line)}
+.pm-row > *{margin:0 4px}
+.pm-head .num,.pm-row .num{text-align:right; padding-right:12px}
+.pm-row .num{font-weight:600}
+.pm-row .num.zero{color:var(--faint); font-weight:500}
+.pm-sw{width:24px; height:24px; border-radius:6px; border:2px solid #fff; box-shadow:0 0 0 1px var(--line-strong); background:var(--c); padding:0; justify-self:center}
+.pm-sw:hover{box-shadow:0 0 0 2px var(--navy)}
+.pm-name{height:34px; border:1px solid transparent; border-radius:7px; padding:0 10px; font-weight:600; background:transparent; min-width:0}
+.pm-name:hover{border-color:var(--line)}
+.pm-name:focus{outline:none; border-color:#9db3c2; background:#fff}
+.pm-move{display:flex; gap:4px; justify-content:center}
+.pm-move button,.pm-del{width:30px; height:30px; border-radius:7px; border:1px solid var(--line); background:#fff; color:var(--muted); padding:0}
+.pm-move button:hover:not([disabled]){border-color:var(--navy); color:var(--navy)}
+.pm-move button[disabled]{opacity:.35}
+.pm-del{border-color:transparent; font-size:18px; justify-self:center}
+.pm-del:hover{background:#fde8eb; color:var(--red)}
+.pm-palette{display:flex; gap:8px; padding:4px 0 12px 52px; flex-wrap:wrap}
+.pm-palette button{width:26px; height:26px; border-radius:7px; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); background:var(--c); padding:0}
+.pm-palette button.on,.pm-palette button:hover{box-shadow:0 0 0 2px var(--navy)}
+.pm-confirm{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 12px 52px; padding:10px 12px; border-radius:8px; background:#fff1f3; border:1px solid #ffd0d7; font-size:13px; color:#7a1f2e}
+.pm-confirm > span{flex-basis:100%}
+.pm-confirm select{height:32px; border:1px solid var(--line-strong); border-radius:7px; padding:0 8px; background:#fff}
+.pm-foot{display:flex; gap:10px; align-items:center; padding:14px 22px 18px; border-top:1px solid var(--line); background:var(--surface-2); border-radius:0 0 14px 14px}
+.pm-foot input{flex:1; max-width:360px; height:36px; border:1px solid var(--line-strong); border-radius:8px; padding:0 12px; background:#fff}
+.pm-foot input:focus{outline:none; border-color:var(--navy)}
+.pm-foot .small{margin-left:auto}
 
 /* ---------- Toast, Konfetti, Feier ---------- */
 .toast{
@@ -381,8 +522,8 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 @media (max-width:1560px){
   :root{--pad:11px; --pt:29px; --pt-gap:4px; --dot:20px; --dot-gap:7px; --c-rank:60px; --c-dl:118px; --c-done:50px; --c-del:36px}
   .main{grid-template-columns:minmax(0,1fr) 270px}
-  .ot-quote{font-size:24px}
-  .ot-question,.note-chip{display:none}
+  .ot-title{font-size:22px}
+  .bq-sub .de,.note-chip,.tab .count{display:none}
 }
 @media (max-width:1440px){
   .main{grid-template-columns:1fr}
@@ -390,7 +531,7 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 }
 @media (max-width:1020px){
   :root{--cols: var(--c-handle) var(--c-marker) var(--c-rank) minmax(180px,1fr) 0 var(--c-urg) var(--c-pts) var(--c-dl) var(--c-done) var(--c-del)}
-  .note-cell,.colhead > div:nth-child(5){display:none}
+  .note-cell,#colhead > div:nth-child(5){display:none}
 }
 </style>
 </head>
@@ -403,40 +544,46 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
       <rect x="2" y="10.5" width="22" height="5" rx="1.5" fill="#ffa600"/>
       <rect x="2" y="18" width="22" height="5" rx="1.5" fill="#238b4a"/>
     </svg>
-    Priorisierer 3000 <small>Mockup v0.2</small>
+    Priorisierer 3000 <small>Mockup v0.3</small>
   </div>
   <div class="spacer"></div>
   <button class="status" id="status" data-s="none" type="button"><span class="led"></span><span id="statusText">Nicht verknüpft</span></button>
   <div class="menu-wrap">
     <button class="btn btn-ghost" id="fileBtn" type="button">Datei ▾</button>
     <div class="menu" id="fileMenu" role="menu">
-      <button data-act="open" type="button"><span>📂</span><span>JSON-Datei verknüpfen<span class="sub">Bestehende Datei öffnen und dauerhaft merken</span></span></button>
-      <button data-act="create" type="button"><span>✨</span><span>Neue JSON-Datei anlegen<span class="sub">Aktuelle Daten in neue Datei speichern</span></span></button>
-      <button data-act="unlink" type="button"><span>⛓️</span><span>Verknüpfung lösen</span></button>
+      <button data-act="open" type="button">JSON-Datei verknüpfen<span class="sub">Bestehende Datei öffnen und dauerhaft merken</span></button>
+      <button data-act="create" type="button">Neue JSON-Datei anlegen<span class="sub">Aktuelle Daten in neue Datei speichern</span></button>
+      <button data-act="unlink" type="button">Verknüpfung lösen</button>
       <hr>
-      <button data-act="export" type="button"><span>⬇️</span><span>Als JSON herunterladen<span class="sub">Backup oder Weg ohne Dateizugriff</span></span></button>
-      <button data-act="import" type="button"><span>⬆️</span><span>JSON importieren (einmalig)</span></button>
+      <button data-act="export" type="button">Als JSON herunterladen<span class="sub">Backup oder Weg ohne Dateizugriff</span></button>
+      <button data-act="import" type="button">JSON importieren (einmalig)</button>
       <hr>
-      <button data-act="demo" type="button"><span>🧪</span><span>Demo-Daten laden</span></button>
+      <button data-act="demo" type="button">Demo-Daten laden</button>
     </div>
   </div>
   <button class="btn btn-primary" id="addBtn" type="button">＋ Aufgabe</button>
   <input type="file" id="importInput" accept=".json,application/json" hidden>
 </header>
 
-<nav class="tabs" id="tabs" aria-label="Projekte"></nav>
+<nav class="tabs" id="tabs" aria-label="Projekte und Ansicht"></nav>
 
 <main class="main">
   <div class="left">
+    <!-- Fokus-Frage aus dem Buch -->
+    <figure class="book-quote">
+      <span class="mark" aria-hidden="true">“</span>
+      <div>
+        <blockquote class="bq-text">What’s the ONE Thing I can do such that by doing it everything else will be easier or unnecessary?</blockquote>
+        <figcaption class="bq-sub">Gary Keller &amp; Jay Papasan, <i>The ONE Thing</i><span class="de"> · Was ist die EINE Sache, durch die alles andere einfacher oder überflüssig wird?</span></figcaption>
+      </div>
+    </figure>
+
     <!-- THE ONE THING -->
     <section class="onething" id="oneThing" aria-label="The One Thing">
       <div class="ot-bar"></div>
       <div class="ot-body">
-        <div class="ot-label">
-          <span class="ot-kicker"><span class="star">★</span> The One Thing · heute</span>
-          <span class="ot-question">Was ist die eine Sache, durch die alles andere leichter oder überflüssig wird?</span>
-        </div>
-        <div class="ot-quote" id="otQuote">–</div>
+        <div class="ot-kicker"><span class="star">★</span> The One Thing · heute</div>
+        <div class="ot-title" id="otTitle">–</div>
         <div class="ot-meta" id="otMeta"></div>
       </div>
       <div class="ot-side">
@@ -448,10 +595,19 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
       </div>
     </section>
 
-    <section class="board" aria-label="Prioritätenliste">
+    <section class="board" aria-label="Liste">
       <div class="colhead" id="colhead">
         <div></div><div></div><div class="c">Prio</div><div>Aufgabe</div><div>Notiz / nächster Schritt</div>
         <div class="c">Ampel</div><div class="c">Aufwand (Story Points)</div><div class="c">Deadline</div><div class="c" title="Erledigt">✓</div><div></div>
+      </div>
+      <div class="wtool" id="waitTool" hidden>
+        <span class="title-s">Warte auf</span>
+        <div class="seg" id="waitSeg"></div>
+        <div class="spacer"></div>
+        <button class="btn btn-navy btn-sm" id="addWaitBtn" type="button">＋ Warte-Eintrag</button>
+      </div>
+      <div class="wrow view head" id="waitHead" hidden>
+        <span></span><span>Wer</span><span>Was brauche ich?</span><span>Projekt / Aufgabe</span><span style="text-align:center">Angefragt</span><span style="text-align:center">Rückmeldung bis</span><span>Rückmeldung / Ergebnis</span><span></span>
       </div>
       <div class="list" id="list"></div>
     </section>
@@ -463,6 +619,12 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
       <label class="cap-in"><input type="number" id="capInput" min="1" step="1"> Story Points pro Woche</label>
       <div class="bar" id="capBar"></div>
       <div class="small" id="capText"></div>
+    </section>
+
+    <section class="card">
+      <h3>Warte auf <button class="lnk" type="button" data-goto="waits">Alle anzeigen</button></h3>
+      <div class="rows" id="waitRows"></div>
+      <div id="waitHint"></div>
     </section>
 
     <section class="card">
@@ -478,7 +640,7 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
     </section>
 
     <section class="card">
-      <h3>Projekte</h3>
+      <h3>Projekte <button class="lnk" type="button" data-pm>Verwalten</button></h3>
       <div class="rows" id="projRows"></div>
     </section>
 
@@ -488,13 +650,28 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
         <span>⋮⋮ ziehen</span><span>Streifen sortieren, oben = Prio 1</span>
         <span><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd></span><span>Streifen verschieben</span>
         <span><kbd>N</kbd></span><span>Neue Aufgabe</span>
-        <span>✓ Haken</span><span>Erledigt, wird gefeiert 🎉</span>
+        <span>✓ Haken</span><span>Erledigt, wird gefeiert</span>
+        <span>Warten auf</span><span>Unter dem Titel aufklappen</span>
         <span>Farbbalken</span><span>Klick schaltet die Ampel weiter</span>
-        <span>Doppelklick Tab</span><span>Projekt umbenennen</span>
       </div>
     </section>
   </aside>
 </main>
+
+<!-- Projektübersicht -->
+<dialog class="dlg" id="projDlg" aria-labelledby="pmTitle">
+  <div class="dlg-head"><h2 id="pmTitle">Projektübersicht</h2><button class="icon-btn" type="button" data-close aria-label="Schließen">×</button></div>
+  <div class="dlg-sub">Projekte anlegen, umbenennen, einfärben, sortieren und löschen. Die Reihenfolge hier ist die Reihenfolge der Tabs.</div>
+  <div class="pm-body">
+    <div class="pm-grid pm-head"><span></span><span>Projekt</span><span class="num">Offen</span><span class="num">SP</span><span class="num">Warte auf</span><span class="num">Erledigt</span><span style="text-align:center">Reihenfolge</span><span></span></div>
+    <div id="pmRows"></div>
+  </div>
+  <form class="pm-foot" id="pmAdd">
+    <input id="pmNew" placeholder="Neues Projekt, z. B. „Sortimentsumstellung“" aria-label="Name des neuen Projekts">
+    <button class="btn btn-navy" type="submit">＋ Hinzufügen</button>
+    <span class="small" id="pmSum"></span>
+  </form>
+</dialog>
 
 <div class="celebrate" id="celebrate">
   <div class="cb-card">
@@ -518,14 +695,16 @@ const URG = {
   wait:   {label:'Wartet / blockiert', color:'#674f95'},
 };
 const URG_ORDER = ['red','yellow','green','wait'];
-/* Aufwand: grün (klein) → rot (groß) */
 const PT_COLOR = {1:'#238b4a',2:'#569933',3:'#8aa40e',5:'#c2a900',8:'#ffa600',13:'#ff7a47',21:'#f9596f'};
 const PT_INK   = {1:'#fff',2:'#fff',3:'#16252f',5:'#16252f',8:'#16252f',13:'#16252f',21:'#fff'};
-const PROJECT_COLORS = ['#31497e','#a14e9a','#006960','#d44c8d','#04565c','#8aa40e','#674f95','#007b5a'];
+const PICK_COLORS = ['#003f5c','#31497e','#674f95','#a14e9a','#d44c8d','#04565c','#006960','#007b5a','#569933','#8aa40e','#c2a900','#ff7a47'];
 const CONFETTI_COLORS = ['#f9596f','#ffa600','#238b4a','#569933','#8aa40e','#ff7a47','#d44c8d','#674f95','#31497e','#c2a900','#006960'];
-const PRAISE = ['Erledigt! Stark. 💪','Abgehakt, weiter so! ✨','Ein Streifen weniger auf dem Radar ✈️','Sauber gelandet! 🛬','Momentum! Weiter geht’s 🚀','Check! Das fühlt sich gut an ✅'];
+const PRAISE = ['Erledigt. Stark!','Abgehakt. Weiter so.','Ein Streifen weniger auf dem Radar.','Sauber gelandet.','Momentum. Weiter geht’s.','Check. Das fühlt sich gut an.'];
 const LS_KEY = 'priorisierer3000.cache';
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CLOCK_SVG = '<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg>';
+const FLAME_SVG = '<svg class="i" viewBox="0 0 16 16"><path d="M8.2 1.2c.4 2.4 4 3.9 4 7.7A4.2 4.2 0 0 1 8 13.1a4.2 4.2 0 0 1-4.2-4.2c0-1.8.9-3 1.8-3.9.1 1.3.8 2.2 1.7 2.5C6.9 5.6 7.4 3.3 8.2 1.2Z" fill="#ff7a47"/></svg>';
+const SLIDERS_SVG = '<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5h7M12.5 4.5H14M2 11.5h1.5M7 11.5h7"/><circle cx="10.7" cy="4.5" r="1.7"/><circle cx="5.3" cy="11.5" r="1.7"/></svg>';
 
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,9);
@@ -535,6 +714,7 @@ const wait = ms => new Promise(r=>setTimeout(r,ms));
 /* ---------- Datum ---------- */
 const z2 = n => String(n).padStart(2,'0');
 const isoDate = d => `${d.getFullYear()}-${z2(d.getMonth()+1)}-${z2(d.getDate())}`;
+const today = () => isoDate(new Date());
 const addDays = n => { const d = new Date(); d.setDate(d.getDate()+n); return isoDate(d); };
 const parseIso = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y,m-1,d); };
 function daysUntil(iso){ const t = parseIso(iso); const n = new Date(); n.setHours(0,0,0,0); return Math.round((t-n)/86400000); }
@@ -547,7 +727,14 @@ function relDays(n){
   if(n === 1) return 'morgen';
   return `in ${n} Tagen`;
 }
+function agoDays(n){
+  if(n === 0) return 'heute';
+  if(n === -1) return 'gestern';
+  if(n < 0) return `vor ${-n} Tagen`;
+  return `in ${n} Tagen`;
+}
 const dlClass = n => n < 0 ? 'overdue' : n <= 2 ? 'soon' : n <= 7 ? 'week' : '';
+const isoValid = v => /^\d{4}-\d{2}-\d{2}$/.test(v||'');
 
 /* =========================================================
    Demo-Daten
@@ -563,7 +750,7 @@ function demoData(){
     ['Budgetplanung 2027 abgeben','Zahlen aus Controlling fehlen noch','p4','red',8,3],
     ['Lieferantengespräch vorbereiten','Agenda und Reklamationsliste zusammenstellen','p1','red',3,1],
     ['Mitarbeitergespräche terminieren','6 Gespräche bis Monatsende, Slots im Kalender blocken','p3','yellow',2,20],
-    ['Freigabe IT-Ticket Handscanner','Wartet auf Rückmeldung der IT, Dienstag nachhaken','p2','wait',1,null],
+    ['Freigabe IT-Ticket Handscanner','Ohne Freigabe kein Rollout','p2','wait',1,null],
     ['KPI-Dashboard Entwurf','Datenquelle klären, ersten Entwurf mit dem Team abstimmen','p2','yellow',5,10],
     ['Inventur vorbereiten','Zähllisten und Teameinteilung','p1','yellow',8,5],
     ['Prozessdoku Wareneingang','Ist-Prozess aufnehmen, Flussdiagramm erstellen','p2','yellow',13,30],
@@ -580,26 +767,52 @@ function demoData(){
     {id:uid(), title:'Reisekosten abrechnen', note:'', project:'p1', urgency:'yellow', points:2, deadline:null, done:true, doneAt:ago(1), wasOneThing:true},
     {id:uid(), title:'Angebot Regalsystem prüfen', note:'', project:'p4', urgency:'red', points:5, deadline:null, done:true, doneAt:ago(2), wasOneThing:true},
   );
-  return { app:'Priorisierer3000', version:1, settings:{capacity:20}, projects:P, tasks, updated:new Date().toISOString() };
+  const byTitle = s => tasks.find(t=>t.title.startsWith(s));
+  const W = (task, project, who, what, asked, due, status='open', response='', recv=null) => ({
+    id:uid(), taskId: task?.id ?? null, project: task?.project ?? project, who, what,
+    askedAt:addDays(asked), dueAt: due==null ? null : addDays(due), status, response,
+    receivedAt: recv==null ? null : addDays(recv),
+  });
+  const waits = [
+    W(byTitle('Freigabe IT'), null, 'IT-Service, Hr. Weber', 'Freigabe Ticket 4711 für Handscanner', -6, -1),
+    W(byTitle('Budgetplanung'), null, 'Controlling, Sabine', 'Ist-Zahlen Q3 je Kostenstelle', -3, 1),
+    W(byTitle('Budgetplanung'), null, 'Einkauf', 'Rahmenverträge 2027 als Liste', -2, 4),
+    W(byTitle('KPI-Dashboard'), null, 'Data-Team', 'Lesezugriff auf die Datenquelle', -8, -4, 'received', 'Zugang eingerichtet, Login über SSO', -2),
+    W(null, 'p3', 'HR, Frau Krämer', 'Stellenbeschreibung Teamleitung', -2, 7),
+  ];
+  return { app:'Priorisierer3000', version:2, settings:{capacity:20}, projects:P, tasks, waits, updated:new Date().toISOString() };
 }
 
 function normalize(d){
   d = d && typeof d==='object' ? d : {};
   const projects = Array.isArray(d.projects) ? d.projects.map((p,i)=>({
-    id:String(p.id ?? uid()), name:String(p.name ?? 'Projekt'), color:p.color || PROJECT_COLORS[i % PROJECT_COLORS.length]
+    id:String(p.id ?? uid()), name:String(p.name ?? 'Projekt'), color:p.color || PICK_COLORS[i % PICK_COLORS.length]
   })) : [];
+  const pids = new Set(projects.map(p=>p.id));
   const tasks = Array.isArray(d.tasks) ? d.tasks.map(t=>({
     id:String(t.id ?? uid()), title:String(t.title ?? ''), note:String(t.note ?? ''),
-    project: t.project ?? (projects[0]?.id ?? null),
+    project: pids.has(t.project) ? t.project : null,
     urgency: URG[t.urgency] ? t.urgency : 'green',
     points: FIB.includes(Number(t.points)) ? Number(t.points) : null,
-    deadline: /^\d{4}-\d{2}-\d{2}$/.test(t.deadline||'') ? t.deadline : null,
+    deadline: isoValid(t.deadline) ? t.deadline : null,
     done: !!t.done, doneAt: t.doneAt || null, wasOneThing: !!t.wasOneThing,
   })) : [];
+  const tids = new Set(tasks.map(t=>t.id));
+  const waits = Array.isArray(d.waits) ? d.waits.map(w=>({
+    id:String(w.id ?? uid()),
+    taskId: tids.has(w.taskId) ? w.taskId : null,
+    project: pids.has(w.project) ? w.project : null,
+    who:String(w.who ?? ''), what:String(w.what ?? ''),
+    askedAt: isoValid(w.askedAt) ? w.askedAt : null,
+    dueAt: isoValid(w.dueAt) ? w.dueAt : null,
+    status: w.status==='received' ? 'received' : 'open',
+    response:String(w.response ?? ''),
+    receivedAt: isoValid(w.receivedAt) ? w.receivedAt : null,
+  })) : [];
   return {
-    app:'Priorisierer3000', version:1,
+    app:'Priorisierer3000', version:2,
     settings:{capacity: Number(d.settings?.capacity) > 0 ? Number(d.settings.capacity) : 20},
-    projects, tasks, updated:d.updated || new Date().toISOString(),
+    projects, tasks, waits, updated:d.updated || new Date().toISOString(),
   };
 }
 
@@ -607,19 +820,32 @@ function normalize(d){
    Zustand
    ========================================================= */
 let state = null;
-let filter = 'all';               // 'all' | Projekt-ID | '__done'
+let view = 'tasks';               // 'tasks' | 'waits' | 'done'
+let filter = 'all';               // 'all' | Projekt-ID | '__none'
+let waitFilter = 'open';          // 'open' | 'overdue' | 'received' | 'all'
 let lastOneId = null;
 const completing = new Set();
+const openPanels = new Set();     // Streifen mit aufgeklapptem „Warten auf“
 
-const open = () => state.tasks.filter(t=>!t.done);
+const inFilter = pid => filter==='all' || (filter==='__none' ? !pid : pid===filter);
+const openTasks = () => state.tasks.filter(t=>!t.done);
 const oneThing = () => state.tasks.find(t=>!t.done) || null;
 const projById = id => state.projects.find(p=>p.id===id);
-const visible = () => state.tasks.filter(t => !t.done && (filter==='all' || t.project===filter));
+const taskById = id => state.tasks.find(t=>t.id===id);
+const visible = () => state.tasks.filter(t => !t.done && inFilter(t.project));
 const sumPts = arr => arr.reduce((s,t)=>s+(t.points||0),0);
+const isOverdue = w => w.status==='open' && !!w.dueAt && daysUntil(w.dueAt) < 0;
+const waitsOf = t => state.waits.filter(w=>w.taskId===t.id);
+const filterProject = () => (filter==='all' || filter==='__none') ? null : filter;
 function capFit(arr){
   const cap = state.settings.capacity; let cum = 0, fit = 0;
   for(const t of arr){ if(cum + (t.points||0) > cap && fit>0) break; cum += t.points||0; fit++; }
   return {fit, cum};
+}
+function sortWaits(a,b){
+  if(a.status!==b.status) return a.status==='open' ? -1 : 1;
+  if(a.status==='received') return (b.receivedAt||'').localeCompare(a.receivedAt||'');
+  return (a.dueAt||'9999').localeCompare(b.dueAt||'9999') || (a.askedAt||'').localeCompare(b.askedAt||'');
 }
 
 /* =========================================================
@@ -679,9 +905,10 @@ async function loadFromFile(){
   if(!text.trim()){ await writeFile(); return; }
   const fromFile = normalize(JSON.parse(text));
   const cache = readCache();
-  if(cache && cache.updated && fromFile.updated && cache.updated > fromFile.updated
-     && JSON.stringify(normalize(cache).tasks) !== JSON.stringify(fromFile.tasks)){
-    if(confirm('Im Browser liegen neuere Änderungen als in der Datei.\n\nOK = Browser-Stand in die Datei übernehmen\nAbbrechen = Datei-Stand laden')){
+  if(cache && cache.updated && fromFile.updated && cache.updated > fromFile.updated){
+    const c = normalize(cache);
+    const differs = JSON.stringify([c.tasks,c.waits,c.projects]) !== JSON.stringify([fromFile.tasks,fromFile.waits,fromFile.projects]);
+    if(differs && confirm('Im Browser liegen neuere Änderungen als in der Datei.\n\nOK = Browser-Stand in die Datei übernehmen\nAbbrechen = Datei-Stand laden')){
       await writeFile(); return;
     }
   }
@@ -756,63 +983,149 @@ async function boot(){
 }
 
 /* =========================================================
+   Bausteine
+   ========================================================= */
+function dateField(field, value, {empty='＋ Datum', tone=true, rel=relDays} = {}){
+  let inner, cls = '';
+  if(value){
+    const n = daysUntil(value);
+    if(tone===true) cls = dlClass(n); else if(tone) cls = tone;
+    const r = typeof rel==='function' ? rel(n) : rel;
+    inner = `<span class="df-date">${fmtDate(value)}</span>${r ? `<span class="df-rel">${r}</span>` : ''}`;
+  } else inner = `<span class="df-empty">${empty}</span>`;
+  return `<div class="df ${cls}" data-field="${field}">
+    <button class="df-btn" type="button" title="Datum wählen">${inner}</button>
+    ${value ? '<button class="df-clear" type="button" title="Datum entfernen" aria-label="Datum entfernen">×</button>' : ''}
+    <input class="df-input" type="date" value="${value||''}" tabindex="-1" aria-hidden="true">
+  </div>`;
+}
+
+function projOptions(selected){
+  return `<option value="" ${!selected?'selected':''}>Ohne Projekt</option>` +
+    state.projects.map(p=>`<option value="${esc(p.id)}" ${p.id===selected?'selected':''}>${esc(p.name)}</option>`).join('');
+}
+
+function waitRowHTML(w, mode){
+  const rec = w.status==='received', od = isOverdue(w);
+  const color = rec ? 'var(--green)' : od ? 'var(--red)' : 'var(--violet)';
+  let link = '';
+  if(mode==='view'){
+    const p = projById(w.project);
+    const tasks = state.tasks.filter(t => (!w.project || t.project===w.project) && (!t.done || t.id===w.taskId));
+    link = `<span class="w-link">
+      <span class="ln" style="--pc:${esc(p?.color||'#c3cfd8')}"><span class="pdot"></span><select class="flat w-proj" aria-label="Projekt">${projOptions(w.project)}</select></span>
+      <span class="ln task"><select class="flat w-task" aria-label="Aufgabe"><option value="">Keine Aufgabe verknüpft</option>${
+        tasks.map(t=>`<option value="${esc(t.id)}" ${t.id===w.taskId?'selected':''}>${esc(t.title||'Ohne Titel')}${t.done?' (erledigt)':''}</option>`).join('')
+      }</select></span>
+    </span>`;
+  }
+  const dueRel = rec ? () => (w.receivedAt ? `erhalten ${fmtShort(w.receivedAt)}` : 'erhalten') : relDays;
+  return `<div class="wrow ${mode} ${rec?'rec':''}" data-wait="${esc(w.id)}" style="--wc:${color}">
+    <span class="wc"><button class="w-check ${rec?'on':''}" type="button" title="${rec?'Wieder öffnen':'Rückmeldung erhalten'}" aria-label="${rec?'Wieder öffnen':'Rückmeldung erhalten'}">${CHECK_SVG}</button></span>
+    <span><input class="w-in who" data-k="who" value="${esc(w.who)}" placeholder="Wer?"></span>
+    <span><input class="w-in" data-k="what" value="${esc(w.what)}" placeholder="Was brauche ich?"></span>
+    ${link}
+    <span>${dateField('askedAt', w.askedAt, {tone:false, rel:agoDays, empty:'＋ Datum'})}</span>
+    <span>${dateField('dueAt', w.dueAt, {tone: rec ? 'done' : true, rel:dueRel, empty:'＋ Stichtag'})}</span>
+    <span><input class="w-in resp" data-k="response" value="${esc(w.response)}" placeholder="${rec?'Was kam zurück?':'Rückmeldung eintragen, sobald da'}"></span>
+    <span class="wx"><button class="w-del" type="button" title="Eintrag löschen" aria-label="Eintrag löschen">×</button></span>
+  </div>`;
+}
+
+function waitChip(t){
+  const ws = waitsOf(t);
+  const op = ws.filter(w=>w.status==='open');
+  const od = op.filter(isOverdue).length;
+  const isOpen = openPanels.has(t.id);
+  let label, cls;
+  if(op.length){ label = `Wartet auf ${op.length}${od ? ' · nachfassen' : ''}`; cls = od ? 'alert' : 'active'; }
+  else if(ws.length){ label = `${ws.length} ${ws.length===1?'Rückmeldung':'Rückmeldungen'}`; cls = ''; }
+  else { label = 'Warten auf …'; cls = 'ghost'; }
+  return `<button class="wchip ${cls} ${isOpen?'open':''}" type="button" aria-expanded="${isOpen}">${CLOCK_SVG}${label}<span class="chev">▾</span></button>`;
+}
+
+function panelHTML(t){
+  const ws = waitsOf(t).sort(sortWaits);
+  return `<div class="wait-panel">
+    <div class="wrow panel head"><span></span><span>Wer</span><span>Was brauche ich?</span><span style="text-align:center">Angefragt</span><span style="text-align:center">Rückmeldung bis</span><span>Rückmeldung / Ergebnis</span><span></span></div>
+    ${ws.map(w=>waitRowHTML(w,'panel')).join('') || '<div class="w-empty">Noch keine Warte-Einträge zu dieser Aufgabe.</div>'}
+    <button class="w-add" type="button">＋ Warte-Eintrag</button>
+  </div>`;
+}
+
+/* =========================================================
    Rendering
    ========================================================= */
-function renderAll(){ renderTabs(); renderOneThing(); renderList(); renderSide(); $('#capInput').value = state.settings.capacity; }
+function renderAll(){ renderTabs(); renderOneThing(); renderBoard(); renderSide(); $('#capInput').value = state.settings.capacity; }
 
 function renderTabs(){
-  const o = open();
-  const doneCount = state.tasks.filter(t=>t.done).length;
+  const o = openTasks();
   let html = `<button class="tab ${filter==='all'?'active':''}" data-f="all" type="button">
       <span class="dot" style="--c:#003f5c"></span>Alle Projekte <span class="count">${o.length} · ${sumPts(o)} SP</span></button>`;
   for(const p of state.projects){
     const ts = o.filter(t=>t.project===p.id);
-    html += `<button class="tab ${filter===p.id?'active':''}" data-f="${esc(p.id)}" type="button" title="Doppelklick zum Umbenennen">
+    html += `<button class="tab ${filter===p.id?'active':''}" data-f="${esc(p.id)}" type="button">
       <span class="dot" style="--c:${esc(p.color)}"></span>${esc(p.name)} <span class="count">${ts.length} · ${sumPts(ts)} SP</span></button>`;
   }
-  html += `<button class="tab add" data-f="__add" type="button">＋ Projekt</button>`;
-  html += `<button class="tab done-tab ${filter==='__done'?'active':''}" data-f="__done" type="button">✓ Erledigt <span class="count">${doneCount}</span></button>`;
+  const loose = o.filter(t=>!t.project);
+  if(loose.length || filter==='__none'){
+    html += `<button class="tab ${filter==='__none'?'active':''}" data-f="__none" type="button">
+      <span class="dot" style="--c:#c3cfd8"></span>Ohne Projekt <span class="count">${loose.length} · ${sumPts(loose)} SP</span></button>`;
+  }
+  html += `<button class="tab manage" data-pm type="button">${SLIDERS_SVG}Projekte</button>`;
+
+  const nTasks = visible().length;
+  const ws = state.waits.filter(w=>inFilter(w.project) && w.status==='open');
+  const nOd = ws.filter(isOverdue).length;
+  const nDone = state.tasks.filter(t=>t.done && inFilter(t.project)).length;
+  html += `<div class="seg" role="tablist" aria-label="Ansicht">
+    <button type="button" data-view="tasks" class="${view==='tasks'?'on':''}">Aufgaben <span class="badge">${nTasks}</span></button>
+    <button type="button" data-view="waits" class="${view==='waits'?'on':''}">Warte auf <span class="badge ${nOd?'alert':''}" title="${nOd} überfällig">${ws.length}</span></button>
+    <button type="button" data-view="done" class="${view==='done'?'on':''}">Erledigt <span class="badge good">${nDone}</span></button>
+  </div>`;
   $('#tabs').innerHTML = html;
 }
 
 function streakInfo(){
-  const today = isoDate(new Date());
-  const doneToday = state.tasks.filter(t=>t.done && t.doneAt && isoDate(new Date(t.doneAt))===today).length;
+  const t0 = today();
+  const doneToday = state.tasks.filter(t=>t.done && t.doneAt && isoDate(new Date(t.doneAt))===t0).length;
   const days = new Set(state.tasks.filter(t=>t.done && t.wasOneThing && t.doneAt).map(t=>isoDate(new Date(t.doneAt))));
   const d = new Date();
-  if(!days.has(isoDate(d))) d.setDate(d.getDate()-1);      // heute zählt noch nicht? dann ab gestern
+  if(!days.has(isoDate(d))) d.setDate(d.getDate()-1);
   let streak = 0;
   while(days.has(isoDate(d))){ streak++; d.setDate(d.getDate()-1); }
-  return {doneToday, streak, todayDone: days.has(today)};
+  return {doneToday, streak, todayDone: days.has(t0)};
 }
 
 function renderOneThing(){
   const t = oneThing();
-  const box = $('#oneThing'), q = $('#otQuote');
+  const box = $('#oneThing'), title = $('#otTitle');
   const {doneToday, streak, todayDone} = streakInfo();
   if(t){
     const p = projById(t.project);
     box.style.setProperty('--otc', URG[t.urgency].color);
-    q.textContent = t.title || 'Ohne Titel';
-    q.classList.remove('empty');
-    q.title = t.title;
-    let meta = `<span class="chip"><span class="sw" style="--c:${esc(p?.color||'#8aa0ad')}"></span>${esc(p?.name||'Ohne Projekt')}</span>`;
+    title.textContent = t.title || 'Ohne Titel';
+    title.classList.toggle('empty', !t.title);
+    title.title = t.title;
+    let meta = `<span class="chip"><span class="sw" style="--c:${esc(p?.color||'#c3cfd8')}"></span>${esc(p?.name||'Ohne Projekt')}</span>`;
     meta += `<span class="chip"><span class="sw" style="--c:${URG[t.urgency].color};border-radius:50%"></span>${URG[t.urgency].label}</span>`;
     meta += `<span class="chip">Aufwand <b>${t.points ?? '?'} SP</b></span>`;
     if(t.deadline){ const n = daysUntil(t.deadline); meta += `<span class="chip ${dlClass(n)}">Deadline <b>${fmtDate(t.deadline)}</b> · ${relDays(n)}</span>`; }
-    if(t.note) meta += `<span class="chip note-chip" style="max-width:420px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.note)}</span>`;
+    const ow = waitsOf(t).filter(w=>w.status==='open');
+    if(ow.length) meta += `<span class="chip wait">${CLOCK_SVG}Wartet auf ${ow.length} ${ow.length===1?'Rückmeldung':'Rückmeldungen'}</span>`;
+    if(t.note) meta += `<span class="chip note-chip" style="max-width:380px;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</span>`;
     $('#otMeta').innerHTML = meta;
     $('#otDone').disabled = false;
   }else{
     box.style.setProperty('--otc', URG.green.color);
-    q.textContent = 'Alles erledigt. Zeit für eine Pause.';
-    q.classList.add('empty');
+    title.textContent = 'Alles erledigt. Zeit für eine Pause.';
+    title.classList.add('empty');
     $('#otMeta').innerHTML = '';
     $('#otDone').disabled = true;
   }
   $('#otStats').innerHTML =
     `<span><b>${doneToday}</b> heute erledigt</span>` +
-    `<span>${streak ? `🔥 <b>${streak}</b> ${streak===1?'Tag':'Tage'} One-Thing-Serie` : 'Starte heute deine Serie'}${streak && !todayDone ? ' · heute halten!' : ''}</span>`;
+    `<span>${streak ? `${FLAME_SVG}<b>${streak}</b> ${streak===1?'Tag':'Tage'} One-Thing-Serie${!todayDone ? ', heute halten' : ''}` : 'Starte heute deine Serie'}</span>`;
   const id = t?.id || null;
   if(lastOneId !== null && id !== lastOneId){ box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap'); }
   lastOneId = id;
@@ -821,14 +1134,8 @@ function renderOneThing(){
 function stripHTML(t, i, oneId){
   const p = projById(t.project);
   const isOne = !t.done && t.id === oneId;
-  const opts = state.projects.map(pr=>`<option value="${esc(pr.id)}" ${pr.id===t.project?'selected':''}>${esc(pr.name)}</option>`).join('');
   const urg = URG_ORDER.map(k=>`<button type="button" data-u="${k}" class="${t.urgency===k?'on':''}" style="--c:${URG[k].color}" title="${URG[k].label}" aria-label="${URG[k].label}"></button>`).join('');
   const pts = FIB.map(n=>`<button type="button" data-p="${n}" class="${t.points===n?'on':''}" style="--pc:${PT_COLOR[n]};--pt-ink:${PT_INK[n]}" aria-label="${n} Story Points">${n}</button>`).join('');
-  let dl, dlCls = '';
-  if(t.deadline){
-    const n = daysUntil(t.deadline); dlCls = dlClass(n);
-    dl = `<span class="dl-date">${fmtDate(t.deadline)}</span><span class="dl-rel">${relDays(n)}</span>`;
-  }else dl = `<span class="dl-empty">＋ Deadline</span>`;
   const rank = t.done
     ? `<span>✓</span><small>${t.doneAt ? fmtShort(isoDate(new Date(t.doneAt))) : ''}</small>`
     : `<span class="rn">${z2(i+1)}</span>${isOne ? '<small>ONE THING</small>' : ''}`;
@@ -842,27 +1149,30 @@ function stripHTML(t, i, oneId){
     <div class="rank">${rank}</div>
     <div class="cell">
       <div class="title" contenteditable="plaintext-only" spellcheck="false" data-ph="Titel der Aufgabe …">${esc(t.title)}</div>
-      <div class="proj" style="--pc:${esc(p?.color||'#8aa0ad')}"><span class="pdot"></span><select aria-label="Projekt">${opts}</select></div>
+      <div class="proj" style="--pc:${esc(p?.color||'#c3cfd8')}"><span class="pdot"></span><select class="flat t-proj" aria-label="Projekt">${projOptions(t.project)}</select>${waitChip(t)}</div>
     </div>
     <div class="cell note-cell"><div class="note" contenteditable="plaintext-only" data-ph="Notiz, nächster Schritt, Kontext …">${esc(t.note)}</div></div>
     <div class="cell urg">${urg}</div>
     <div class="cell pts">${pts}</div>
-    <div class="cell dl ${dlCls}">
-      <button class="dl-btn" type="button" title="Deadline wählen">${dl}</button>
-      ${t.deadline ? '<button class="dl-clear" type="button" title="Deadline entfernen" aria-label="Deadline entfernen">×</button>' : ''}
-      <input class="dl-input" type="date" value="${t.deadline||''}" tabindex="-1" aria-hidden="true">
-    </div>
+    <div class="cell dl">${dateField('deadline', t.deadline, {empty:'＋ Deadline'})}</div>
     <div class="done-cell">${doneBtn}</div>
     <div class="act"><button class="del" type="button" title="Löschen" aria-label="Löschen">×</button></div>
+    ${openPanels.has(t.id) ? panelHTML(t) : ''}
   </article>`;
+}
+
+function renderBoard(){
+  const isWaits = view==='waits';
+  $('#colhead').hidden = isWaits;
+  $('#waitTool').hidden = !isWaits;
+  $('#waitHead').hidden = !isWaits;
+  if(isWaits) renderWaits(); else renderList();
 }
 
 function renderList(){
   const list = $('#list');
-  const doneView = filter === '__done';
-  list.classList.toggle('done-view', doneView);
-  if(doneView){
-    const ds = state.tasks.filter(t=>t.done).sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||''));
+  if(view==='done'){
+    const ds = state.tasks.filter(t=>t.done && inFilter(t.project)).sort((a,b)=>(b.doneAt||'').localeCompare(a.doneAt||''));
     list.innerHTML = ds.length ? ds.map((t,i)=>stripHTML(t,i)).join('')
       : `<div class="empty"><b>Noch nichts erledigt.</b>Der erste Haken ist der wichtigste.</div>`;
     return;
@@ -886,8 +1196,34 @@ function renderList(){
   }
 }
 
+function renderWaits(){
+  const all = state.waits.filter(w=>inFilter(w.project));
+  const cnt = {
+    open: all.filter(w=>w.status==='open').length,
+    overdue: all.filter(isOverdue).length,
+    received: all.filter(w=>w.status==='received').length,
+    all: all.length,
+  };
+  const seg = [['open','Offen'],['overdue','Überfällig'],['received','Erhalten'],['all','Alle']];
+  $('#waitSeg').innerHTML = seg.map(([k,l])=>`<button type="button" data-wf="${k}" class="${waitFilter===k?'on':''}">${l} <span class="badge ${k==='overdue'&&cnt.overdue?'alert':''}">${cnt[k]}</span></button>`).join('');
+
+  const ws = all.filter(w => waitFilter==='all' ? true : waitFilter==='overdue' ? isOverdue(w) : w.status===waitFilter).sort(sortWaits);
+  const list = $('#list');
+  if(!ws.length){
+    list.innerHTML = `<div class="empty"><b>${waitFilter==='overdue' ? 'Nichts überfällig.' : 'Keine Einträge.'}</b>${waitFilter==='overdue' ? 'Alle Rückmeldungen sind im Zeitplan.' : 'Mit „＋ Warte-Eintrag“ festhalten, auf wen du wartest.'}</div>`;
+    return;
+  }
+  let html = '', lastGroup = null;
+  for(const w of ws){
+    const g = w.status==='received' ? 'Erhalten' : isOverdue(w) ? 'Überfällig, nachfassen' : 'Offen';
+    if(waitFilter==='all' || waitFilter==='open'){ if(g!==lastGroup){ html += `<div class="wgroup">${g}</div>`; lastGroup = g; } }
+    html += waitRowHTML(w,'view');
+  }
+  list.innerHTML = html;
+}
+
 function renderSide(){
-  const all = open();
+  const all = openTasks();
   const cap = state.settings.capacity;
 
   // Kapazität
@@ -900,6 +1236,15 @@ function renderSide(){
   }).join('');
   $('#capText').innerHTML = `Die <b>Top ${fit}</b> Aufgaben passen in deine Woche (<b>${cum}</b> von ${cap} SP).<br>Gesamt im Backlog: <b>${sumPts(all)} SP</b>${unest?` · <b>${unest}</b> noch ungeschätzt`:''}.`;
 
+  // Warte auf
+  const ow = state.waits.filter(w=>w.status==='open').sort(sortWaits);
+  $('#waitRows').innerHTML = ow.slice(0,4).map(w=>{
+    const n = w.dueAt ? daysUntil(w.dueAt) : null;
+    return `<button class="dlrow ${n==null?'':dlClass(n)}" type="button" data-goto="waits"><span class="d">${w.dueAt?fmtShort(w.dueAt):'–'}</span><span class="t"><b>${esc(w.who||'?')}</b> · ${esc(w.what||'…')}</span><span class="r">${n==null?'ohne Stichtag':relDays(n)}</span></button>`;
+  }).join('') || '<div class="small">Du wartest gerade auf niemanden.</div>';
+  const od = ow.filter(isOverdue).length;
+  $('#waitHint').innerHTML = od ? `<div class="warn">${od} ${od===1?'Rückmeldung ist':'Rückmeldungen sind'} überfällig. Heute nachfassen.</div>` : (ow.length > 4 ? `<div class="small" style="margin-top:8px">und ${ow.length-4} weitere</div>` : '');
+
   // Deadlines
   const withDl = all.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
   $('#dlRows').innerHTML = withDl.slice(0,5).map(t=>{
@@ -909,8 +1254,8 @@ function renderSide(){
   const belowCap = all.slice(fit).filter(t=>t.deadline && daysUntil(t.deadline) <= 7);
   const overdue = withDl.filter(t=>daysUntil(t.deadline) < 0);
   let dh = '';
-  if(overdue.length) dh = `<div class="warn">⚠ ${overdue.length} ${overdue.length===1?'Aufgabe ist':'Aufgaben sind'} überfällig. Neu terminieren oder sofort erledigen.</div>`;
-  else if(belowCap.length) dh = `<div class="warn">⚠ „${esc(belowCap[0].title)}“ ist ${relDays(daysUntil(belowCap[0].deadline))} fällig, liegt aber unter der Kapazitätsgrenze.</div>`;
+  if(overdue.length) dh = `<div class="warn">${overdue.length} ${overdue.length===1?'Aufgabe ist':'Aufgaben sind'} überfällig. Neu terminieren oder sofort erledigen.</div>`;
+  else if(belowCap.length) dh = `<div class="warn">„${esc(belowCap[0].title)}“ ist ${relDays(daysUntil(belowCap[0].deadline))} fällig, liegt aber unter der Kapazitätsgrenze.</div>`;
   $('#dlHint').innerHTML = dh;
 
   // Ampel
@@ -922,9 +1267,9 @@ function renderSide(){
   const firstNonRed = all.findIndex(t=>t.urgency!=='red');
   const redBelow = firstNonRed>=0 && all.slice(firstNonRed).some(t=>t.urgency==='red');
   let hint = '';
-  if(all.length && reds/all.length > 0.3) hint = `<div class="warn">⚠ ${Math.round(reds/all.length*100)} % sind rot. Wenn alles dringend ist, ist nichts dringend. Maximal 2 bis 3 echte Rote.</div>`;
-  else if(redBelow) hint = `<div class="warn">⚠ Eine rote Aufgabe liegt unter einer nicht-roten. Bewusst so entschieden?</div>`;
-  else if(all.length) hint = `<div class="ok">✓ Ampel und Reihenfolge passen zusammen.</div>`;
+  if(all.length && reds/all.length > 0.3) hint = `<div class="warn">${Math.round(reds/all.length*100)} % sind rot. Wenn alles dringend ist, ist nichts dringend. Maximal 2 bis 3 echte Rote.</div>`;
+  else if(redBelow) hint = `<div class="warn">Eine rote Aufgabe liegt unter einer nicht-roten. Bewusst so entschieden?</div>`;
+  else if(all.length) hint = `<div class="ok">Ampel und Reihenfolge passen zusammen.</div>`;
   $('#urgHint').innerHTML = hint;
 
   // Projekte
@@ -936,13 +1281,14 @@ function renderSide(){
 }
 
 /* =========================================================
-   Aktionen
+   Aktionen: Aufgaben
    ========================================================= */
 const taskOf = el => state.tasks.find(t=>t.id===el.closest('.strip')?.dataset.id);
+const waitOf = el => state.waits.find(w=>w.id===el.closest('[data-wait]')?.dataset.wait);
 
 function addTask(){
-  if(filter==='__done') filter = 'all';
-  const project = filter!=='all' ? filter : (state.projects[0]?.id ?? null);
+  view = 'tasks';
+  const project = filter==='__none' ? null : (filterProject() ?? state.projects[0]?.id ?? null);
   const t = {id:uid(), title:'', note:'', project, urgency:'green', points:null, deadline:null, done:false, doneAt:null, wasOneThing:false};
   state.tasks.push(t);                // neue Aufgaben starten unten – sie müssen sich hocharbeiten
   save(); renderAll();
@@ -950,16 +1296,6 @@ function addTask(){
   el?.scrollIntoView({block:'center', behavior:'smooth'}); el?.focus();
 }
 
-function addProject(){
-  const name = prompt('Name des neuen Projekts:');
-  if(!name?.trim()) return;
-  const used = new Set(state.projects.map(p=>p.color));
-  const color = PROJECT_COLORS.find(c=>!used.has(c)) || PROJECT_COLORS[state.projects.length % PROJECT_COLORS.length];
-  const p = {id:uid(), name:name.trim(), color};
-  state.projects.push(p); filter = p.id; save(); renderAll();
-}
-
-/* Reihenfolge der sichtbaren Aufgaben in die Gesamtliste zurückschreiben */
 function applyVisibleOrder(ids){
   const byId = Object.fromEntries(state.tasks.map(t=>[t.id,t]));
   const slots = []; state.tasks.forEach((t,i)=>{ if(ids.includes(t.id)) slots.push(i); });
@@ -988,8 +1324,7 @@ async function completeTask(t, srcEl){
   const r = srcEl.getBoundingClientRect();
   const cx = r.left + r.width/2, cy = r.top + r.height/2;
 
-  const check = $(`.strip[data-id="${t.id}"] .check`);
-  check?.classList.add('pop');
+  $(`.strip[data-id="${t.id}"] .check`)?.classList.add('pop');
   burst(cx, cy, {count: isOne ? 110 : 80, angle:-90, spread:150, speed:[5,13]});
 
   if(isOne){
@@ -999,64 +1334,134 @@ async function completeTask(t, srcEl){
       burst(W, H, {count:120, angle:-122, spread:28, speed:[16,27]});
     }, 180);
     setTimeout(()=> burst(W/2, H*0.35, {count:90, angle:-90, spread:360, speed:[3,11]}), 650);
-    $('#cbSub').textContent = `„${t.title || 'Ohne Titel'}“ – der Tag ist gewonnen. Alles Weitere ist Bonus.`;
+    $('#cbSub').textContent = `„${t.title || 'Ohne Titel'}“. Der Tag ist gewonnen, alles Weitere ist Bonus.`;
     const c = $('#celebrate'); c.classList.remove('show'); void c.offsetWidth; c.classList.add('show');
   }
 
   const strip = $(`.strip[data-id="${t.id}"]`);
   await wait(280);
-  if(strip){ strip.classList.add('completing'); await wait(760); }
+  if(strip){ strip.style.setProperty('--h', strip.offsetHeight + 'px'); strip.classList.add('completing'); await wait(760); }
 
   t.done = true; t.doneAt = new Date().toISOString(); t.wasOneThing = isOne;
+  openPanels.delete(t.id);
   completing.delete(t.id);
   save(); renderAll();
-  toast(isOne ? 'THE ONE THING erledigt. Stark! 🏆' : PRAISE[Math.floor(Math.random()*PRAISE.length)]);
+  toast(isOne ? 'The One Thing ist erledigt. Stark!' : PRAISE[Math.floor(Math.random()*PRAISE.length)]);
 }
 
 function restoreTask(t){
   t.done = false; t.doneAt = null; t.wasOneThing = false;
-  state.tasks = [...state.tasks.filter(x=>x!==t), t];   // landet unten in der offenen Liste
+  state.tasks = [...state.tasks.filter(x=>x!==t), t];
   save(); renderAll(); toast('Wiederhergestellt, liegt jetzt ganz unten');
 }
 
-/* ---------- Ereignisse: Liste ---------- */
+/* =========================================================
+   Aktionen: Warte auf
+   ========================================================= */
+function addWait({task=null, project=null}={}){
+  const w = {id:uid(), taskId:task?.id ?? null, project: task ? task.project : project,
+    who:'', what:'', askedAt:today(), dueAt:null, status:'open', response:'', receivedAt:null};
+  state.waits.push(w);
+  if(task) openPanels.add(task.id);
+  if(!task && (waitFilter==='received' || waitFilter==='overdue')) waitFilter = 'open';
+  save(); renderAll();
+  const el = $(`[data-wait="${w.id}"] [data-k="who"]`);
+  el?.scrollIntoView({block:'nearest', behavior:'smooth'}); el?.focus();
+}
+
+function toggleWait(w){
+  if(w.status==='open'){ w.status = 'received'; w.receivedAt = today(); }
+  else { w.status = 'open'; w.receivedAt = null; }
+  save(); renderAll();
+  if(w.status==='received'){
+    toast('Rückmeldung erhalten. Kurz notieren, was zurückkam.');
+    $(`[data-wait="${w.id}"] [data-k="response"]`)?.focus();
+  }
+}
+
+/* =========================================================
+   Ereignisse: Liste (Aufgaben, Warte-Einträge, Erledigt)
+   ========================================================= */
 const list = $('#list');
 
 list.addEventListener('input', e=>{
+  const w = waitOf(e.target);
+  if(w && e.target.matches('.w-in')){ w[e.target.dataset.k] = e.target.value; save(); return; }
   const t = taskOf(e.target); if(!t) return;
   if(e.target.classList.contains('title')){ t.title = e.target.textContent; if(t.id===oneThing()?.id) renderOneThing(); renderSide(); }
   if(e.target.classList.contains('note')) t.note = e.target.textContent;
   save();
 });
 list.addEventListener('keydown', e=>{
-  if(e.target.matches('[contenteditable]') && (e.key==='Enter' || e.key==='Escape')){ e.preventDefault(); e.target.blur(); }
+  if(e.target.matches('[contenteditable], .w-in') && (e.key==='Enter' || e.key==='Escape')){ e.preventDefault(); e.target.blur(); }
   const arrow = e.key==='ArrowUp' || e.key==='ArrowDown';
-  if(arrow && (e.altKey || e.target.classList.contains('handle'))){
+  if(arrow && view==='tasks' && (e.altKey || e.target.classList.contains('handle'))){
     const t = taskOf(e.target); if(!t || t.done) return;
     e.preventDefault(); moveTask(t.id, e.key==='ArrowUp' ? -1 : 1);
   }
 });
 list.addEventListener('change', e=>{
-  const t = taskOf(e.target); if(!t) return;
-  if(e.target.matches('.proj select')){ t.project = e.target.value; save(); renderAll(); }
-  if(e.target.matches('.dl-input')){ t.deadline = e.target.value || null; save(); renderAll(); }
+  const el = e.target;
+  // Datumsfelder gehören entweder zu einem Warte-Eintrag oder zu einer Aufgabe
+  if(el.matches('.df-input')){
+    const owner = waitOf(el) || taskOf(el); if(!owner) return;
+    owner[el.closest('.df').dataset.field] = el.value || null;
+    save(); renderAll(); return;
+  }
+  if(el.matches('.w-in')){ renderTabs(); renderSide(); renderOneThing(); return; }
+  if(el.matches('.w-proj')){
+    const w = waitOf(el); w.project = el.value || null;
+    const t = taskById(w.taskId); if(t && t.project !== w.project) w.taskId = null;
+    save(); renderAll(); return;
+  }
+  if(el.matches('.w-task')){
+    const w = waitOf(el); w.taskId = el.value || null;
+    const t = taskById(w.taskId); if(t) w.project = t.project;
+    save(); renderAll(); return;
+  }
+  if(el.matches('.t-proj')){
+    const t = taskOf(el); t.project = el.value || null;
+    waitsOf(t).forEach(w=> w.project = t.project);
+    save(); renderAll();
+  }
 });
 list.addEventListener('click', e=>{
-  const t = taskOf(e.target); if(!t) return;
   const hit = sel => e.target.closest(sel);
+
+  // Datumsfeld öffnen / leeren (Aufgabe oder Warte-Eintrag)
+  if(hit('.df-btn')){
+    const inp = hit('.df').querySelector('.df-input');
+    try{ inp.showPicker(); }catch(err){ inp.focus(); inp.click(); }
+    return;
+  }
+  if(hit('.df-clear')){
+    const owner = waitOf(e.target) || taskOf(e.target);
+    owner[hit('.df').dataset.field] = null; save(); renderAll(); return;
+  }
+
+  // Warte-Einträge
+  const w = waitOf(e.target);
+  if(w){
+    if(hit('.w-check')) return toggleWait(w);
+    if(hit('.w-del')){
+      if((!w.who.trim() && !w.what.trim()) || confirm(`Warte-Eintrag „${w.who || w.what}“ löschen?`)){
+        state.waits = state.waits.filter(x=>x!==w); save(); renderAll();
+      }
+    }
+    return;
+  }
+
+  const t = taskOf(e.target); if(!t) return;
+  if(hit('.wchip')){ openPanels.has(t.id) ? openPanels.delete(t.id) : openPanels.add(t.id); renderBoard(); return; }
+  if(hit('.w-add')){ addWait({task:t}); return; }
   if(hit('[data-u]')){ t.urgency = hit('[data-u]').dataset.u; save(); renderAll(); return; }
   if(hit('[data-p]')){ const n = Number(hit('[data-p]').dataset.p); t.points = t.points===n ? null : n; save(); renderAll(); return; }
   if(hit('.marker') && !t.done){ t.urgency = URG_ORDER[(URG_ORDER.indexOf(t.urgency)+1) % URG_ORDER.length]; save(); renderAll(); return; }
   if(hit('.check')){ completeTask(t, hit('.check')); return; }
   if(hit('.restore')){ restoreTask(t); return; }
-  if(hit('.dl-clear')){ t.deadline = null; save(); renderAll(); return; }
-  if(hit('.dl-btn')){
-    const inp = hit('.dl').querySelector('.dl-input');
-    try{ inp.showPicker(); }catch(err){ inp.focus(); inp.click(); }
-    return;
-  }
   if(hit('.del')){
-    if((!t.title.trim() && !t.note.trim()) || confirm(`„${t.title}“ löschen?`)){
+    if((!t.title.trim() && !t.note.trim()) || confirm(`„${t.title}“ löschen?\n\nVerknüpfte Warte-Einträge bleiben in der Liste „Warte auf“ erhalten.`)){
+      waitsOf(t).forEach(w=> w.taskId = null);
       state.tasks = state.tasks.filter(x=>x!==t); save(); renderAll();
     }
   }
@@ -1065,13 +1470,13 @@ list.addEventListener('click', e=>{
 /* ---------- Drag & Drop (Griff ⋮⋮ oder Prio-Nummer) ---------- */
 let dragEl = null;
 list.addEventListener('mousedown', e=>{
-  if(filter==='__done') return;
+  if(view!=='tasks') return;
   const grip = e.target.closest('.handle, .rank');
   if(grip) grip.closest('.strip').draggable = true;
 });
 list.addEventListener('mouseup', ()=> list.querySelectorAll('.strip[draggable="true"]').forEach(s=>s.draggable=false));
 list.addEventListener('dragstart', e=>{
-  dragEl = e.target.closest('.strip'); if(!dragEl) return;
+  dragEl = e.target.closest?.('.strip'); if(!dragEl) return;
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', dragEl.dataset.id);
   list.classList.add('dnd');
@@ -1096,18 +1501,121 @@ list.addEventListener('dragend', ()=>{
   applyVisibleOrder(ids); save(); renderAll();
 });
 
-/* ---------- Ereignisse: Kopf, Tabs, One Thing, Seitenleiste ---------- */
-$('#addBtn').addEventListener('click', addTask);
+/* =========================================================
+   Projektübersicht (Dialog)
+   ========================================================= */
+const dlg = $('#projDlg');
+let pmPalette = null, pmConfirm = null;
+
+function openPM(){ pmPalette = pmConfirm = null; renderPM(); dlg.showModal(); }
+
+function renderPM(){
+  const last = state.projects.length - 1;
+  $('#pmRows').innerHTML = state.projects.map((p,i)=>{
+    const ts = state.tasks.filter(t=>t.project===p.id), op = ts.filter(t=>!t.done);
+    const wsAll = state.waits.filter(w=>w.project===p.id), wsOpen = wsAll.filter(w=>w.status==='open');
+    const num = n => `<span class="num ${n?'':'zero'}">${n}</span>`;
+    let html = `<div class="pm-grid pm-row" data-pid="${esc(p.id)}">
+      <button class="pm-sw" type="button" style="--c:${esc(p.color)}" title="Farbe ändern" aria-label="Farbe ändern"></button>
+      <input class="pm-name" value="${esc(p.name)}" aria-label="Projektname">
+      ${num(op.length)}${num(sumPts(op))}${num(wsOpen.length)}${num(ts.length-op.length)}
+      <span class="pm-move"><button type="button" data-mv="-1" ${i===0?'disabled':''} aria-label="Nach oben">↑</button><button type="button" data-mv="1" ${i===last?'disabled':''} aria-label="Nach unten">↓</button></span>
+      <button class="pm-del" type="button" title="Projekt löschen" aria-label="Projekt löschen">×</button>
+    </div>`;
+    if(pmPalette===p.id){
+      html += `<div class="pm-palette" data-pid="${esc(p.id)}">${PICK_COLORS.map(c=>`<button type="button" data-color="${c}" class="${c===p.color?'on':''}" style="--c:${c}" aria-label="Farbe ${c}"></button>`).join('')}</div>`;
+    }
+    if(pmConfirm===p.id){
+      const others = state.projects.filter(o=>o.id!==p.id);
+      html += `<div class="pm-confirm" data-pid="${esc(p.id)}">
+        <span>${ts.length} ${ts.length===1?'Aufgabe':'Aufgaben'} und ${wsAll.length} ${wsAll.length===1?'Warte-Eintrag hängen':'Warte-Einträge hängen'} an „${esc(p.name)}“.</span>
+        <select class="pm-target">${others.map(o=>`<option value="${esc(o.id)}">Verschieben nach „${esc(o.name)}“</option>`).join('')}<option value="">Ohne Projekt behalten</option><option value="__delete">Alles mit löschen</option></select>
+        <button class="btn btn-danger btn-sm pm-do" type="button">Projekt löschen</button>
+        <button class="btn btn-plain btn-sm pm-cancel" type="button">Abbrechen</button>
+      </div>`;
+    }
+    return html;
+  }).join('') || '<div class="w-empty">Noch keine Projekte. Lege unten das erste an.</div>';
+  const o = openTasks();
+  $('#pmSum').textContent = `${state.projects.length} Projekte · ${o.length} offene Aufgaben · ${sumPts(o)} SP`;
+}
+
+function deleteProject(id, mode){
+  if(mode==='__delete'){
+    const tids = new Set(state.tasks.filter(t=>t.project===id).map(t=>t.id));
+    state.tasks = state.tasks.filter(t=>t.project!==id);
+    state.waits = state.waits.filter(w=>w.project!==id && !tids.has(w.taskId));
+  }else{
+    const to = mode || null;
+    state.tasks.forEach(t=>{ if(t.project===id) t.project = to; });
+    state.waits.forEach(w=>{ if(w.project===id) w.project = to; });
+  }
+  state.projects = state.projects.filter(p=>p.id!==id);
+  if(filter===id) filter = 'all';
+}
+
+$('#pmRows').addEventListener('click', e=>{
+  const row = e.target.closest('[data-pid]'); if(!row) return;
+  const p = projById(row.dataset.pid); if(!p) return;
+  const hit = sel => e.target.closest(sel);
+  if(hit('.pm-sw')){ pmPalette = pmPalette===p.id ? null : p.id; pmConfirm = null; renderPM(); return; }
+  if(hit('[data-color]')){ p.color = hit('[data-color]').dataset.color; pmPalette = null; save(); renderPM(); renderAll(); return; }
+  if(hit('[data-mv]')){
+    const i = state.projects.indexOf(p), j = i + Number(hit('[data-mv]').dataset.mv);
+    [state.projects[i], state.projects[j]] = [state.projects[j], state.projects[i]];
+    save(); renderPM(); renderAll(); return;
+  }
+  if(hit('.pm-del')){
+    const used = state.tasks.some(t=>t.project===p.id) || state.waits.some(w=>w.project===p.id);
+    if(!used){ deleteProject(p.id); save(); renderPM(); renderAll(); toast(`Projekt „${p.name}“ gelöscht`); return; }
+    pmConfirm = pmConfirm===p.id ? null : p.id; pmPalette = null; renderPM(); return;
+  }
+  if(hit('.pm-cancel')){ pmConfirm = null; renderPM(); return; }
+  if(hit('.pm-do')){
+    deleteProject(p.id, row.querySelector('.pm-target').value);
+    pmConfirm = null; save(); renderPM(); renderAll(); toast(`Projekt „${p.name}“ gelöscht`);
+  }
+});
+$('#pmRows').addEventListener('input', e=>{
+  if(!e.target.matches('.pm-name')) return;
+  const p = projById(e.target.closest('[data-pid]').dataset.pid);
+  p.name = e.target.value; save(); renderTabs();
+});
+$('#pmRows').addEventListener('keydown', e=>{ if(e.target.matches('.pm-name') && e.key==='Enter'){ e.preventDefault(); e.target.blur(); } });
+$('#pmAdd').addEventListener('submit', e=>{
+  e.preventDefault();
+  const inp = $('#pmNew'), name = inp.value.trim(); if(!name) return inp.focus();
+  const used = new Set(state.projects.map(p=>p.color));
+  const color = PICK_COLORS.find(c=>!used.has(c)) || PICK_COLORS[state.projects.length % PICK_COLORS.length];
+  state.projects.push({id:uid(), name, color});
+  inp.value = ''; save(); renderPM(); renderAll(); inp.focus();
+});
+dlg.addEventListener('click', e=>{ if(e.target.closest('[data-close]') || e.target===dlg) dlg.close(); });
+dlg.addEventListener('close', ()=>{
+  state.projects.forEach(p=>{ if(!p.name.trim()) p.name = 'Projekt'; });
+  save(); renderAll();
+});
+
+/* =========================================================
+   Ereignisse: Kopf, Tabs, One Thing, Seitenleiste
+   ========================================================= */
+$('#addBtn').addEventListener('click', ()=> view==='waits' ? addWait({project:filterProject()}) : addTask());
+$('#addWaitBtn').addEventListener('click', ()=> addWait({project:filterProject()}));
 $('#otDone').addEventListener('click', e=> completeTask(oneThing(), e.currentTarget));
 $('#tabs').addEventListener('click', e=>{
-  const b = e.target.closest('.tab'); if(!b) return;
-  if(b.dataset.f==='__add') return addProject();
+  if(e.target.closest('[data-pm]')) return openPM();
+  const v = e.target.closest('[data-view]');
+  if(v){ view = v.dataset.view; renderAll(); return; }
+  const b = e.target.closest('.tab[data-f]'); if(!b) return;
   filter = b.dataset.f; renderAll();
 });
-$('#tabs').addEventListener('dblclick', e=>{
-  const b = e.target.closest('.tab'); const p = b && projById(b.dataset.f); if(!p) return;
-  const name = prompt('Projekt umbenennen:', p.name);
-  if(name?.trim()){ p.name = name.trim(); save(); renderAll(); }
+$('#waitSeg').addEventListener('click', e=>{
+  const b = e.target.closest('[data-wf]'); if(!b) return;
+  waitFilter = b.dataset.wf; renderWaits();
+});
+document.querySelector('.side').addEventListener('click', e=>{
+  if(e.target.closest('[data-pm]')) return openPM();
+  if(e.target.closest('[data-goto="waits"]')){ view = 'waits'; filter = 'all'; waitFilter = 'open'; renderAll(); }
 });
 $('#capInput').addEventListener('change', e=>{
   state.settings.capacity = Math.max(1, Math.round(Number(e.target.value)||20)); save(); renderAll();
@@ -1126,7 +1634,7 @@ menu.addEventListener('click', e=>{
   if(act==='unlink') unlink();
   if(act==='export') exportJson();
   if(act==='import') $('#importInput').click();
-  if(act==='demo' && confirm('Aktuelle Daten durch Demo-Daten ersetzen?')){ state = demoData(); filter='all'; save(); renderAll(); }
+  if(act==='demo' && confirm('Aktuelle Daten durch Demo-Daten ersetzen?')){ state = demoData(); filter='all'; view='tasks'; openPanels.clear(); save(); renderAll(); }
 });
 $('#importInput').addEventListener('change', async e=>{
   const f = e.target.files[0]; if(!f) return;
@@ -1140,6 +1648,7 @@ $('#status').addEventListener('click', e=>{
 });
 
 document.addEventListener('keydown', e=>{
+  if(dlg.open) return;
   const typing = e.target.matches('input, select, textarea, [contenteditable]');
   if(!typing && (e.key==='n' || e.key==='N') && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); addTask(); }
 });
