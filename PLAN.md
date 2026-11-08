@@ -111,6 +111,16 @@ Die Reihenfolge im Array `tasks` ist die Priorität. Warte-Einträge hängen imm
 - One-Thing-Serie entfernt, Kachel zeigt „heute erledigt“ und „offen“
 - Anleitung in [README.md](README.md)
 
+### v1.1: Design-Review umgesetzt
+
+- **Farbregel**: Ampelfarben bedeuten nur noch Dringlichkeit bzw. Status. Story Points sind neutral (Navy), Projekte nutzen nur kühle Töne. Warme Projektfarben aus älteren Dateien werden automatisch umgestellt.
+- **Ruhigere Streifen**: Ampel und Aufwand zeigen nur den gewählten Wert, die Auswahl öffnet sich per Klick als kleines Popover. Der Erledigt-Haken ist neutral und wird erst beim Darüberfahren grün. Die Prio-Nummer steht auf neutralem Grund.
+- **Mehr Platz für die Liste**: Fokus-Frage als Zeile in der One-Thing-Kachel, Kachel kompakt, kein Doppelrahmen um die Liste, Schalter für die kompakte Ansicht
+- **Seitenleiste mit drei Karten**: „Heute klären“ (eine nach Schwere sortierte Liste: überfällige Deadlines und Rückmeldungen, Konflikte mit der Kapazität, Hinweise), „Diese Woche“ (Kennzahlen und Kapazität), „Projekte“. Die Bedienung steckt hinter „?“.
+- **Laptop**: Unter 1440 px wird die Seitenleiste zur Schublade, der Knopf „Hinweise“ zeigt die Anzahl
+- **Lesbarkeit**: Typo-Skala mit fünf Größen (12, 13, 15, 20, 26 px), Textfarben mit mindestens 4,5 : 1 Kontrast, Versalien nur in Spaltenköpfen
+- **Datum** kürzer („Mi 11.11.“), relative Angaben nur bis 7 Tage
+
 ## 6. Iterationsplan
 
 1. ~~Mockup bewerten~~ ✓

@@ -9,7 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
-   Farbsystem – aus den beiden gewählten Paletten
+   Design-Tokens
+   Farbregel: Ampelfarben (Rot, Amber, Grün, Violett) bedeuten
+   ausschließlich Dringlichkeit bzw. Status. Projekte nutzen kühle Töne,
+   Story Points sind neutral.
    ========================================================= */
 :root{
   /* Palette 1 */
@@ -19,35 +22,40 @@
   --petrol:#04565c; --teal:#006960; --emerald:#007b5a; --green:#238b4a;
   --leaf:#569933; --olive:#8aa40e; --mustard:#c2a900;
 
-  /* Oberflächen */
+  /* Textvarianten der Signalfarben (Kontrast ≥ 4,5 : 1 auf Weiß) */
+  --red-ink:#c0263f; --amber-ink:#8a5a00; --orange-ink:#b4461b; --green-ink:#1b6b3a; --violet-ink:#5a4485;
+
+  /* Oberflächen und Text */
   --bg:#eef2f5; --surface:#ffffff; --surface-2:#f6f8fa;
-  --ink:#16252f; --muted:#5d6d79; --faint:#a8b5bf; --line:#dde4e9; --line-strong:#c3cfd8;
-  --shadow:0 1px 2px rgba(0,40,60,.06), 0 2px 8px rgba(0,40,60,.05);
+  --ink:#16252f; --muted:#5d6d79; --muted-2:#667582;
+  --faint:#b8c3cc;            /* nur für Linien und Deko, nie für Text */
+  --line:#dde4e9; --line-strong:#c3cfd8;
+  --shadow:0 1px 2px rgba(0,40,60,.05), 0 1px 4px rgba(0,40,60,.04);
   --shadow-lift:0 12px 30px rgba(0,40,60,.22);
 
+  /* Typo-Skala: genau fünf Größen */
+  --fs-xs:12px; --fs-s:13px; --fs-m:15px; --fs-l:20px; --fs-xl:26px;
   --font:"Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
   --quote:"Lora",Georgia,"Times New Roman",serif;
 
-  /* Raster eines Streifens – alle Maße an einer Stelle */
+  /* Raster eines Streifens */
   --pad:14px;
-  --pt:32px;  --pt-gap:6px;
-  --dot:22px; --dot-gap:10px;
-  --c-handle:28px; --c-marker:8px; --c-rank:68px;
-  --c-urg:  calc(4*var(--dot) + 3*var(--dot-gap) + 2*var(--pad));
-  --c-pts:  calc(7*var(--pt)  + 6*var(--pt-gap)  + 2*var(--pad));
-  --c-dl:136px; --c-done:58px; --c-del:42px;
-  --cols: var(--c-handle) var(--c-marker) var(--c-rank) minmax(220px,24%) minmax(120px,1fr)
+  --strip-h:64px;
+  --c-handle:28px; --c-marker:6px; --c-rank:60px;
+  --c-urg:156px; --c-pts:100px; --c-dl:128px; --c-done:56px; --c-del:40px;
+  --cols: var(--c-handle) var(--c-marker) var(--c-rank) minmax(240px,30%) minmax(160px,1fr)
           var(--c-urg) var(--c-pts) var(--c-dl) var(--c-done) var(--c-del);
 
   /* Raster der Warte-Einträge */
   --w-panel: 44px minmax(130px,170px) minmax(160px,1.3fr) 124px 150px minmax(160px,1fr) 40px;
   --w-view:  44px minmax(130px,180px) minmax(180px,1.3fr) 230px 124px 150px minmax(180px,1fr) 40px;
 }
+body.compact{--strip-h:46px}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
   margin:0; background:var(--bg); color:var(--ink);
-  font-family:var(--font); font-size:14px; line-height:1.4;
+  font-family:var(--font); font-size:var(--fs-s); line-height:1.4;
   font-feature-settings:"tnum" 1;
   display:flex; flex-direction:column; overflow:hidden;
   -webkit-font-smoothing:antialiased;
@@ -57,19 +65,20 @@ button{cursor:pointer}
 button[disabled]{cursor:default}
 svg.i{width:14px;height:14px;flex:none}
 [hidden]{display:none !important}
+:focus-visible{outline:2px solid var(--navy); outline-offset:2px}
 
 /* ---------- Kopfzeile ---------- */
 .topbar{
-  height:58px; flex:none; display:flex; align-items:center; gap:12px;
-  padding:0 24px; background:var(--navy); color:#fff;
+  height:58px; flex:none; display:flex; align-items:center; gap:10px;
+  padding:0 24px; background:var(--navy); color:#fff; position:relative; z-index:95;
 }
-.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.2px}
-.brand small{font-weight:500;color:#9fc1d3;font-size:12px;margin-left:4px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:var(--fs-m);letter-spacing:.1px}
+.brand small{font-weight:500;color:#9fc1d3;font-size:var(--fs-xs);margin-left:2px}
 .spacer{flex:1}
 .status{
   display:flex;align-items:center;gap:8px; height:36px;
   background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
-  border-radius:999px; padding:0 14px 0 12px; font-size:12.5px; color:#dbe9f1;
+  border-radius:999px; padding:0 14px 0 12px; font-size:var(--fs-xs); color:#dbe9f1;
   max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .status .led{width:9px;height:9px;border-radius:50%;background:#8aa0ad;flex:none}
@@ -77,24 +86,28 @@ svg.i{width:14px;height:14px;flex:none}
 .status[data-s="saving"] .led,
 .status[data-s="needs-permission"] .led,
 .status[data-s="none"] .led{background:var(--amber)}
-.status[data-s="error"] .led{background:var(--red)}
+.status[data-s="error"] .led,.status[data-s="invalid"] .led,.status[data-s="conflict"] .led{background:var(--red)}
 .status:hover{background:rgba(255,255,255,.16)}
 
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px; height:36px;
-  border-radius:8px; padding:0 14px; font-weight:600; font-size:13px; border:1px solid transparent; white-space:nowrap;
+  border-radius:8px; padding:0 14px; font-weight:600; font-size:var(--fs-s); border:1px solid transparent; white-space:nowrap;
 }
 .btn-primary{background:var(--amber); color:var(--navy)}
 .btn-primary:hover{filter:brightness(1.06)}
 .btn-ghost{background:transparent; color:#fff; border-color:rgba(255,255,255,.25)}
 .btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-ghost.on{background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.4)}
+.btn-icon{width:36px; padding:0}
+.btn-icon svg{width:18px;height:18px}
 .btn-navy{background:var(--navy); color:#fff}
 .btn-navy:hover{filter:brightness(1.15)}
 .btn-plain{background:#fff; border-color:var(--line); color:var(--ink)}
 .btn-plain:hover{border-color:var(--line-strong); background:var(--surface-2)}
-.btn-danger{background:var(--red); color:#fff}
-.btn-danger:hover{filter:brightness(1.05)}
+.btn-danger{background:var(--red-ink); color:#fff}
+.btn-danger:hover{filter:brightness(1.08)}
 .btn-sm{height:32px; padding:0 12px}
+#sideBtn{display:none}
 
 .menu-wrap{position:relative}
 .menu{
@@ -105,7 +118,7 @@ svg.i{width:14px;height:14px;flex:none}
 .menu.open{display:block}
 .menu button{display:block; width:100%; text-align:left; background:none; border:0; padding:9px 12px; border-radius:7px}
 .menu button:hover{background:var(--surface-2)}
-.menu .sub{display:block; font-size:12px;color:var(--muted)}
+.menu .sub{display:block; font-size:var(--fs-xs); color:var(--muted)}
 .menu hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
 .menu button[disabled]{opacity:.45;cursor:not-allowed}
 
@@ -114,17 +127,17 @@ svg.i{width:14px;height:14px;flex:none}
   flex:none; display:flex; align-items:center; gap:8px; padding:10px 24px;
   background:var(--surface); border-bottom:1px solid var(--line); overflow-x:auto;
 }
+.tabs > *{flex-shrink:0}
 .tab{
   display:inline-flex;align-items:center;gap:8px; white-space:nowrap; height:34px;
   border:1px solid var(--line); background:var(--surface); border-radius:999px;
   padding:0 14px; font-weight:500;
 }
-.tabs > *{flex-shrink:0}
 .tab:hover{border-color:var(--line-strong); background:var(--surface-2)}
 .tab .dot{width:10px;height:10px;border-radius:3px;background:var(--c,#8aa0ad)}
-.tab .count{font-size:11.5px;color:var(--muted)}
+.tab .count{font-size:var(--fs-xs);color:var(--muted)}
 .tab.active{background:var(--navy); border-color:var(--navy); color:#fff}
-.tab.active .count{color:#a9c6d5}
+.tab.active .count{color:#b7d0dc}
 .tab.active .dot{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
 .tab.manage{border-style:dashed;color:var(--muted)}
 .tab.manage:hover{color:var(--ink)}
@@ -138,79 +151,75 @@ svg.i{width:14px;height:14px;flex:none}
 .seg button:hover{color:var(--ink)}
 .seg button.on{background:#fff; color:var(--ink); box-shadow:0 1px 3px rgba(0,40,60,.14)}
 .badge{min-width:20px; height:18px; padding:0 6px; border-radius:9px; background:var(--line); color:var(--ink);
-  font-size:11px; font-weight:600; display:inline-grid; place-items:center}
-.badge.alert{background:var(--red); color:#fff}
-.badge.good{background:#dcf1e3; color:#1b6b3a}
+  font-size:var(--fs-xs); font-weight:600; display:inline-grid; place-items:center; line-height:1}
+.badge.alert{background:var(--red-ink); color:#fff}
+.badge.warn{background:#ffe7b3; color:var(--amber-ink)}
+.badge.good{background:#dcf1e3; color:var(--green-ink)}
 
 /* ---------- Hauptbereich ---------- */
-.main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:20px; padding:14px 24px 20px}
-.left{min-height:0; display:flex; flex-direction:column; gap:12px}
+.main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:24px; padding:14px 24px 0}
+.left{min-height:0; display:flex; flex-direction:column; gap:10px}
 
-/* ---------- Fokus-Frage aus „The ONE Thing“ ---------- */
-.book-quote{flex:none; margin:0; display:flex; gap:12px; align-items:flex-start; padding:0 4px}
-.book-quote .mark{font-family:var(--quote); font-size:44px; line-height:.9; color:var(--amber); margin-top:-2px}
-.bq-text{margin:0; font-family:var(--quote); font-style:italic; font-weight:500; font-size:17px; color:var(--navy); line-height:1.35}
-.bq-sub{margin-top:2px; font-size:12px; color:var(--muted)}
-.bq-sub i{font-family:var(--quote)}
-
-/* ---------- THE ONE THING ---------- */
+/* ---------- THE ONE THING (kompakt, mit Fokus-Frage) ---------- */
 .onething{
   --otc:var(--amber);
-  flex:none; display:grid; grid-template-columns:8px minmax(0,1fr) auto; align-items:stretch;
-  background:linear-gradient(100deg, #fff 55%, color-mix(in srgb, var(--otc) 9%, #fff));
-  border:1px solid color-mix(in srgb, var(--otc) 40%, var(--line));
-  border-radius:12px; box-shadow:var(--shadow); overflow:hidden;
+  flex:none; display:grid; grid-template-columns:6px minmax(0,1fr) auto; align-items:stretch;
+  background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); overflow:hidden;
 }
 .onething.swap{animation:otIn .6s cubic-bezier(.2,.8,.2,1)}
-@keyframes otIn{from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:none}}
+@keyframes otIn{from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:none}}
 .ot-bar{background:var(--otc)}
-.ot-body{padding:14px 22px 14px 20px; min-width:0}
-.ot-kicker{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--navy)}
+.ot-body{padding:12px 20px 13px 18px; min-width:0}
+.ot-top{display:flex; align-items:baseline; gap:14px; min-width:0}
+.ot-kicker{font-size:var(--fs-xs); font-weight:700; color:var(--navy); white-space:nowrap}
 .ot-kicker .star{color:var(--amber)}
-.ot-title{margin-top:4px; font-weight:700; font-size:24px; line-height:1.25; letter-spacing:-.01em; color:var(--navy);
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ot-quote{font-family:var(--quote); font-style:italic; font-weight:500; font-size:var(--fs-m); color:var(--navy);
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.ot-cite{font-size:var(--fs-xs); color:var(--muted-2); white-space:nowrap}
+.ot-main{margin-top:6px; display:flex; align-items:center; gap:10px 14px; min-width:0; flex-wrap:wrap}
+.ot-title{font-weight:700; font-size:var(--fs-l); line-height:1.25; color:var(--ink);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%}
 .ot-title.is-empty{color:var(--muted); font-weight:600}
-.ot-meta{margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.ot-meta{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
 .chip{display:inline-flex; align-items:center; gap:6px; height:24px; padding:0 10px; border-radius:999px;
-  background:var(--surface-2); border:1px solid var(--line); font-size:12px; color:var(--muted); white-space:nowrap}
+  background:var(--surface-2); border:1px solid var(--line); font-size:var(--fs-xs); color:var(--muted); white-space:nowrap}
 .chip b{color:var(--ink); font-weight:600}
 .chip .sw{width:8px;height:8px;border-radius:2px;background:var(--c)}
-.chip.overdue{background:#fff0f2; border-color:#ffd0d7; color:#a3283b}
-.chip.soon{background:#fff6e5; border-color:#ffe0a3; color:#8a5a00}
-.chip.wait{background:#f2eff8; border-color:#ddd5ec; color:var(--violet)}
-.ot-side{display:flex; align-items:center; gap:22px; padding:14px 22px}
-.ot-stats{display:flex; flex-direction:column; gap:6px; font-size:12.5px; color:var(--muted); white-space:nowrap}
-.ot-stats span{display:flex; align-items:center; gap:6px}
-.ot-stats b{color:var(--ink); font-size:15px; font-weight:700}
+.chip.overdue{background:#fff0f2; border-color:#ffd0d7; color:var(--red-ink)}
+.chip.overdue b{color:var(--red-ink)}
+.chip.soon{background:#fff6e5; border-color:#ffe0a3; color:var(--amber-ink)}
+.chip.soon b{color:var(--amber-ink)}
+.chip.wait{background:#f2eff8; border-color:#ddd5ec; color:var(--violet-ink)}
+.ot-side{display:flex; align-items:center; padding:12px 18px}
 .ot-done{
-  height:48px; padding:0 22px; border-radius:10px; border:0;
-  background:var(--green); color:#fff; font-weight:700; font-size:15px;
-  display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 14px rgba(35,139,74,.35);
+  height:44px; padding:0 20px; border-radius:10px; border:0;
+  background:var(--green); color:#fff; font-weight:700; font-size:var(--fs-m);
+  display:inline-flex; align-items:center; gap:8px; box-shadow:0 3px 10px rgba(35,139,74,.3);
   transition:transform .12s, box-shadow .12s;
 }
-.ot-done:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(35,139,74,.45)}
+.ot-done:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(35,139,74,.4)}
 .ot-done:active{transform:translateY(1px)}
-.ot-done svg{width:20px;height:20px}
-.ot-done[disabled]{opacity:.4; box-shadow:none; transform:none}
+.ot-done svg{width:18px;height:18px}
+.ot-done[disabled]{opacity:.35; box-shadow:none; transform:none}
 
-/* ---------- Board ---------- */
-.board{flex:1; min-height:0; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow)}
+/* ---------- Liste (ohne zusätzlichen Rahmen) ---------- */
+.board{flex:1; min-height:0; display:flex; flex-direction:column}
 .colhead{
   display:grid; grid-template-columns:var(--cols); align-items:center;
-  padding:0 15px; height:38px; flex:none;
-  font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
-  border-bottom:1px solid var(--line);
+  padding:0 3px; height:34px; flex:none;
+  font-size:var(--fs-xs); font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid var(--line-strong);
 }
 .colhead > div{padding:0 var(--pad); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .colhead > div:empty{padding:0}
 .colhead .c{text-align:center}
-.list{flex:1; min-height:0; overflow-y:auto; padding:12px 14px 24px; display:flex; flex-direction:column; gap:8px}
+.list{flex:1; min-height:0; overflow-y:auto; padding:10px 2px 28px; display:flex; flex-direction:column; gap:6px}
 
 /* ---------- Flugstreifen ---------- */
 .strip{
   --urg:var(--green);
   flex:none; position:relative;
-  display:grid; grid-template-columns:var(--cols); grid-template-rows:minmax(66px,auto) auto; align-items:stretch;
+  display:grid; grid-template-columns:var(--cols); grid-template-rows:minmax(var(--strip-h),auto) auto; align-items:stretch;
   background:var(--surface);
   border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
   transition:box-shadow .15s, opacity .15s, border-color .15s;
@@ -218,125 +227,143 @@ svg.i{width:14px;height:14px;flex:none}
 .strip:hover{border-color:var(--line-strong)}
 .strip:focus-within{border-color:#9db3c2}
 .strip.dragging{opacity:.55; box-shadow:var(--shadow-lift); border-style:dashed}
-.strip.over-cap{opacity:.7}
+.strip.over-cap{opacity:.78}
 .strip.over-cap:hover,.strip.over-cap:focus-within{opacity:1}
+.strip.flash,.wrow.flash{animation:flash 1.4s ease}
+@keyframes flash{0%,60%{box-shadow:0 0 0 3px var(--amber)} 100%{box-shadow:var(--shadow)}}
 
 .handle{
   grid-row:1 / span 2;
   display:flex;align-items:center;justify-content:center; cursor:grab;
-  color:#a3b2bd; font-size:13px; letter-spacing:-2px; user-select:none;
-  border-radius:7px 0 0 7px;
+  color:var(--muted-2); font-size:var(--fs-s); letter-spacing:-2px; user-select:none;
+  border-radius:7px 0 0 7px; opacity:.55;
 }
+.strip:hover .handle{opacity:1}
 .handle:hover{color:var(--navy); background:var(--surface-2)}
 .handle:active{cursor:grabbing}
-.handle:focus-visible{outline:2px solid var(--navy); outline-offset:-2px}
 .marker{grid-row:1 / span 2; background:var(--urg); cursor:pointer}
 .marker:hover{filter:brightness(1.08)}
 
 .rank{
-  display:flex;flex-direction:column;align-items:center;justify-content:center; gap:2px;
-  font-weight:700; font-size:20px; letter-spacing:-.01em; color:var(--navy);
-  background:color-mix(in srgb, var(--urg) 10%, #fff);
+  display:flex;flex-direction:column;align-items:center;justify-content:center; gap:1px;
+  font-weight:700; font-size:var(--fs-l); letter-spacing:-.01em; color:var(--navy);
   border-right:1px solid var(--line); cursor:grab; user-select:none;
 }
-.rank small{font-size:8.5px; font-weight:700; letter-spacing:.07em; color:var(--navy); white-space:nowrap; line-height:1}
-.strip.one{border-color:color-mix(in srgb, var(--urg) 55%, var(--line)); box-shadow:0 0 0 1px color-mix(in srgb, var(--urg) 30%, transparent), var(--shadow)}
-.strip.one .rank{background:color-mix(in srgb, var(--urg) 22%, #fff)}
+.rank .star{font-size:var(--fs-xs); color:var(--amber); line-height:1}
+.rank .dd{font-size:var(--fs-xs); font-weight:600; color:var(--muted); line-height:1}
+.strip.over-cap .rank{color:var(--muted)}
 
-.cell{padding:10px var(--pad); border-right:1px solid var(--line); min-width:0; display:flex; flex-direction:column; justify-content:center}
-.title{font-weight:600; font-size:15px; line-height:1.3; outline:none; border-radius:4px; overflow-wrap:anywhere}
-.note{color:var(--muted); outline:none; font-size:13.5px; overflow-wrap:anywhere;
+.cell{padding:8px var(--pad); border-right:1px solid var(--line); min-width:0; display:flex; flex-direction:column; justify-content:center}
+.title{font-weight:600; font-size:var(--fs-m); line-height:1.3; outline:none; border-radius:4px; overflow-wrap:anywhere}
+.note{color:var(--muted); outline:none; font-size:var(--fs-s); overflow-wrap:anywhere;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+body.compact .note{-webkit-line-clamp:1}
+body.compact .cell{padding-top:4px; padding-bottom:4px}
+body.compact .proj{margin-top:1px}
 .note:focus{display:block; color:var(--ink)}
-[contenteditable]:empty::before{content:attr(data-ph); color:var(--faint); font-weight:400}
+[contenteditable]:empty::before{content:attr(data-ph); color:var(--muted-2); font-weight:400}
 [contenteditable]:focus{background:#f1f6f9; box-shadow:0 0 0 4px #f1f6f9}
 
-.proj{display:flex;align-items:center;gap:6px;margin-top:4px; flex-wrap:wrap; row-gap:2px}
+.proj{display:flex;align-items:center;gap:6px;margin-top:3px; flex-wrap:wrap; row-gap:2px}
 .proj .pdot{width:8px;height:8px;border-radius:2px;background:var(--pc,#8aa0ad);flex:none}
 select.flat{
   appearance:none; -webkit-appearance:none; field-sizing:content; max-width:100%;
   border:0; background:transparent no-repeat right 1px center / 9px 9px
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1.5 3.5 5 7l3.5-3.5' fill='none' stroke='%235d6d79' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
-  font-size:12px; color:var(--muted); padding:0 14px 0 0; cursor:pointer; text-overflow:ellipsis;
+  font-size:var(--fs-xs); color:var(--muted); padding:0 14px 0 0; cursor:pointer; text-overflow:ellipsis;
 }
 select.flat:hover{color:var(--ink)}
 
 /* Warte-Chip im Streifen */
 .wchip{
   display:inline-flex; align-items:center; gap:5px; height:20px; padding:0 8px; margin-left:4px;
-  border-radius:999px; border:1px solid transparent; background:none; font-size:11.5px; font-weight:500; color:var(--muted);
+  border-radius:999px; border:1px solid transparent; background:none; font-size:var(--fs-xs); font-weight:500; color:var(--muted);
 }
-.wchip .chev{font-size:9px; transition:transform .15s}
+.wchip .chev{width:9px;height:9px; transition:transform .15s}
 .wchip.open .chev{transform:rotate(180deg)}
 .wchip:hover{border-color:var(--line); background:var(--surface-2); color:var(--ink)}
-.wchip.active{background:#f2eff8; border-color:#ddd5ec; color:var(--violet)}
-.wchip.alert{background:#fff0f2; border-color:#ffd0d7; color:#c0263f}
+.wchip.active{background:#f2eff8; border-color:#ddd5ec; color:var(--violet-ink)}
+.wchip.alert{background:#fff0f2; border-color:#ffd0d7; color:var(--red-ink)}
 .wchip.ghost{opacity:0}
 .strip:hover .wchip.ghost,.wchip.ghost.open,.wchip.ghost:focus-visible{opacity:1}
 
-/* Ampel */
-.urg{flex-direction:row; align-items:center; justify-content:center; gap:var(--dot-gap)}
-.urg button{
-  width:var(--dot);height:var(--dot);border-radius:50%; border:2px solid transparent; flex:none;
-  background:color-mix(in srgb, var(--c) 26%, #fff); padding:0; transition:transform .1s, background .1s;
+/* Wert-Chips (Ampel, Aufwand) – Auswahl öffnet ein Popover */
+.cell.vc{align-items:center}
+.val{
+  display:inline-flex; align-items:center; gap:8px; height:30px; padding:0 12px; max-width:100%;
+  border-radius:999px; border:1px solid transparent; background:none; font-size:var(--fs-s); color:var(--ink); white-space:nowrap;
 }
-.urg button:hover{transform:scale(1.12); background:color-mix(in srgb, var(--c) 60%, #fff)}
-.urg button.on{background:var(--c); border-color:#fff; box-shadow:0 0 0 2px var(--c)}
+.val:hover,.val[aria-expanded="true"]{border-color:var(--line-strong); background:var(--surface-2)}
+.val .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.val.pts b{font-weight:700}
+.val.pts span{color:var(--muted)}
+.val.unset{color:var(--muted-2); border:1px dashed var(--line-strong); padding:0 10px}
+.strip.is-done .val{pointer-events:none}
 
-/* Fibonacci-Punkte */
-.pts{flex-direction:row; align-items:center; justify-content:center; gap:var(--pt-gap)}
-.pts button{
-  width:var(--pt); height:var(--pt); flex:none; border-radius:7px; border:1px solid var(--line);
-  background:var(--surface); font-weight:600; font-size:13px; color:var(--muted); padding:0;
-  display:grid; place-items:center; transition:background .1s, border-color .1s;
+.pop{
+  position:fixed; z-index:120; background:#fff; border:1px solid var(--line); border-radius:10px;
+  box-shadow:var(--shadow-lift); padding:6px; min-width:200px;
 }
-.pts button:hover{border-color:var(--pc); color:var(--ink); background:color-mix(in srgb, var(--pc) 12%, #fff)}
-.pts button.on{background:var(--pc); border-color:var(--pc); color:var(--pt-ink,#fff); font-weight:700}
+.pop-title{font-size:var(--fs-xs); font-weight:600; color:var(--muted); padding:4px 8px 6px}
+.pop-urg button{
+  display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border:0; background:none;
+  border-radius:7px; text-align:left; font-size:var(--fs-s); color:var(--ink);
+}
+.pop-urg button:hover,.pop-urg button.on{background:var(--surface-2)}
+.pop-urg button.on{font-weight:600}
+.pop-urg .dot{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+.pop-urg small{margin-left:auto; padding-left:18px; font-size:var(--fs-xs); color:var(--muted); font-weight:400}
+.pop-pts{display:flex; gap:6px; padding:2px 4px 4px}
+.pop-pts button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:600;font-size:var(--fs-s);padding:0}
+.pop-pts button:hover{border-color:var(--navy)}
+.pop-pts button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.pop-foot{border-top:1px solid var(--line); margin-top:4px; padding:6px 8px 2px; display:flex; justify-content:space-between; gap:12px; font-size:var(--fs-xs); color:var(--muted)}
+.pop-foot button{border:0;background:none;color:var(--indigo);font-weight:600;padding:0;font-size:var(--fs-xs)}
 
 /* Datumsfeld (Deadline, Stichtag, Angefragt) */
 .cell.dl{align-items:stretch; padding-left:8px; padding-right:8px}
 .df{position:relative; width:100%}
 .df-btn{
-  width:100%; height:44px; border-radius:8px; border:1px solid transparent; background:none;
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px; padding:0 6px;
+  width:100%; height:42px; border-radius:8px; border:1px solid transparent; background:none;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; padding:0 6px;
 }
+body.compact .strip .df-btn{height:36px}
 .df-btn:hover{background:var(--surface-2); border-color:var(--line)}
-.df-date{font-weight:600; font-size:13.5px; color:var(--ink); white-space:nowrap}
-.df-rel{font-size:11.5px; color:var(--muted); white-space:nowrap}
-.df-empty{font-size:12.5px; color:var(--faint); border:1px dashed var(--line-strong); border-radius:6px; padding:3px 10px; white-space:nowrap}
-.df-btn:hover .df-empty{color:var(--muted)}
-.df.week .df-rel{color:#8a5a00}
-.df.soon .df-rel{color:#c25a00; font-weight:600}
-.df.soon .df-date{color:#c25a00}
-.df.overdue .df-rel,.df.overdue .df-date{color:#d0324b; font-weight:700}
-.df.done .df-rel{color:var(--green); font-weight:600}
+.df-date{font-weight:600; font-size:var(--fs-s); color:var(--ink); white-space:nowrap}
+.df-rel{font-size:var(--fs-xs); color:var(--muted); white-space:nowrap}
+.df-empty{font-size:var(--fs-xs); color:var(--muted-2); border:1px dashed var(--line-strong); border-radius:6px; padding:3px 10px; white-space:nowrap}
+.df-btn:hover .df-empty{color:var(--ink)}
+.df.week .df-rel{color:var(--amber-ink)}
+.df.soon .df-rel,.df.soon .df-date{color:var(--orange-ink); font-weight:600}
+.df.overdue .df-rel,.df.overdue .df-date{color:var(--red-ink); font-weight:700}
+.df.done .df-rel{color:var(--green-ink); font-weight:600}
 .df-input{position:absolute; left:8px; bottom:4px; width:1px; height:1px; opacity:0; pointer-events:none; border:0; padding:0}
 .df-clear{
   position:absolute; top:3px; right:3px; width:18px; height:18px; border-radius:50%; border:0;
-  background:var(--surface-2); color:var(--muted); font-size:12px; line-height:1; padding:0; opacity:0; transition:opacity .15s;
+  background:var(--surface-2); color:var(--muted); font-size:var(--fs-xs); line-height:1; padding:0; opacity:0; transition:opacity .15s;
 }
 .df:hover .df-clear{opacity:1}
-.df-clear:hover{background:#fde8eb; color:var(--red)}
+.df-clear:hover{background:#fde8eb; color:var(--red-ink)}
 
-/* Erledigt-Haken + Löschen */
+/* Erledigt-Haken (neutral, grün erst beim Darüberfahren) + Löschen */
 .done-cell,.act{display:flex; align-items:center; justify-content:center}
 .done-cell{border-right:1px solid var(--line)}
 .check{
-  width:34px; height:34px; border-radius:50%; border:2px solid var(--green); background:#fff; color:var(--green);
-  display:grid; place-items:center; padding:0; transition:background .15s, color .15s, transform .15s;
+  width:32px; height:32px; border-radius:50%; border:2px solid var(--line-strong); background:#fff; color:var(--faint);
+  display:grid; place-items:center; padding:0; transition:background .15s, color .15s, border-color .15s, transform .15s;
 }
-.check svg{width:18px; height:18px}
-.check:hover{background:var(--green); color:#fff; transform:scale(1.08)}
-.check.pop{animation:pop .45s cubic-bezier(.3,1.6,.5,1) forwards}
-@keyframes pop{0%{transform:scale(1)} 40%{transform:scale(1.35); background:var(--green); color:#fff} 100%{transform:scale(1.1); background:var(--green); color:#fff}}
-.restore{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:16px;padding:0}
+.check svg{width:16px; height:16px}
+.check:hover{background:var(--green); border-color:var(--green); color:#fff; transform:scale(1.08)}
+.check.pop-anim{animation:pop .45s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes pop{0%{transform:scale(1)} 40%{transform:scale(1.35); background:var(--green); border-color:var(--green); color:#fff} 100%{transform:scale(1.1); background:var(--green); border-color:var(--green); color:#fff}}
+.restore{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--muted);font-size:var(--fs-m);padding:0}
 .restore:hover{border-color:var(--navy);color:var(--navy)}
 .del,.w-del{
-  width:28px;height:28px;border-radius:7px;border:0;background:none;color:#b3c0c9;font-size:18px;line-height:1;padding:0;
+  width:28px;height:28px;border-radius:7px;border:0;background:none;color:var(--muted-2);font-size:var(--fs-l);line-height:1;padding:0;
   opacity:0; transition:opacity .15s, background .15s, color .15s;
 }
 .strip:hover > .act .del,.del:focus-visible,.wrow:hover .w-del,.w-del:focus-visible{opacity:1}
-.del:hover,.w-del:hover{background:#fde8eb;color:var(--red)}
+.del:hover,.w-del:hover{background:#fde8eb;color:var(--red-ink)}
 
 /* Abschluss-Animation */
 .strip.completing{animation:complete .75s cubic-bezier(.5,0,.3,1) forwards; pointer-events:none; overflow:hidden}
@@ -344,15 +371,15 @@ select.flat:hover{color:var(--ink)}
   0%  {max-height:var(--h)}
   30% {background:#e6f6ec; border-color:var(--green)}
   55% {opacity:1; transform:translateX(0); max-height:var(--h)}
-  100%{opacity:0; transform:translateX(80px); max-height:0; margin-bottom:-8px; border-width:0}
+  100%{opacity:0; transform:translateX(80px); max-height:0; margin-bottom:-6px; border-width:0}
 }
 
 /* Erledigt-Ansicht */
 .strip.is-done{background:var(--surface-2)}
 .strip.is-done .title{text-decoration:line-through; text-decoration-color:var(--faint); color:var(--muted)}
-.strip.is-done .urg,.strip.is-done .pts,.strip.is-done .dl,.strip.is-done .marker{pointer-events:none}
-.strip.is-done .urg,.strip.is-done .pts,.strip.is-done .dl{opacity:.5}
-.strip.is-done .rank{color:var(--green); cursor:default; background:#eaf6ee}
+.strip.is-done .dl,.strip.is-done .marker{pointer-events:none}
+.strip.is-done .vc,.strip.is-done .dl{opacity:.6}
+.strip.is-done .rank{color:var(--green-ink); cursor:default}
 .strip.is-done .handle{cursor:default}
 
 /* ---------- Warte-Einträge ---------- */
@@ -369,9 +396,9 @@ select.flat:hover{color:var(--ink)}
 .wrow > span{padding:0 6px; min-width:0}
 .wrow.panel{grid-template-columns:var(--w-panel)}
 .wrow.view{grid-template-columns:var(--w-view); background:#fff}
-.wrow.head{min-height:30px; box-shadow:none; font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.wrow.head{min-height:30px; box-shadow:none; font-size:var(--fs-xs); font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
 .wrow.head > span{padding:0 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.wrow.view.head{background:none; padding:0 15px; flex:none}
+.wrow.view.head{background:none; padding:0 3px; flex:none; border-bottom-color:var(--line-strong)}
 .wrow .df-btn{height:38px}
 .wrow.rec .w-in:not(.resp){color:var(--muted)}
 .wrow.rec .resp{color:var(--ink); font-weight:500}
@@ -387,7 +414,7 @@ select.flat:hover{color:var(--ink)}
   width:100%; height:32px; border:1px solid transparent; border-radius:6px; background:transparent; padding:0 8px;
   text-overflow:ellipsis;
 }
-.w-in::placeholder{color:var(--faint)}
+.w-in::placeholder{color:var(--muted-2)}
 .w-in:hover{border-color:var(--line); background:#fff}
 .w-in:focus{outline:none; border-color:#9db3c2; background:#fff}
 .w-in.who{font-weight:600}
@@ -395,86 +422,95 @@ select.flat:hover{color:var(--ink)}
 .w-link{display:flex; flex-direction:column; gap:2px; padding:4px 14px !important}
 .w-link .ln{display:flex; align-items:center; gap:6px; min-width:0}
 .w-link .pdot{width:8px;height:8px;border-radius:2px;background:var(--pc,#8aa0ad);flex:none}
-.w-link select.flat{font-size:12.5px}
+.w-link select.flat{font-size:var(--fs-s)}
 .w-link .ln.task select{color:var(--ink)}
 .w-add{
   margin-top:8px; height:30px; padding:0 12px; border-radius:7px; border:1px dashed var(--line-strong);
-  background:#fff; color:var(--muted); font-size:12.5px; font-weight:500;
+  background:#fff; color:var(--muted); font-size:var(--fs-xs); font-weight:500;
 }
 .w-add:hover{color:var(--ink); border-color:var(--navy)}
-.w-empty{padding:10px 14px; font-size:12.5px; color:var(--muted)}
+.w-empty{padding:10px 14px; font-size:var(--fs-s); color:var(--muted)}
 
-.wtool{flex:none; display:flex; align-items:center; gap:12px; padding:10px 15px; border-bottom:1px solid var(--line)}
-.wtool .title-s{font-weight:700; color:var(--navy); margin-right:6px}
-.wgroup{flex:none; margin:8px 0 0; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.wtool{flex:none; display:flex; align-items:center; gap:12px; padding:0 3px 10px}
+.wtool .title-s{font-weight:700; font-size:var(--fs-m); color:var(--navy); margin-right:6px}
+.wgroup{flex:none; margin:10px 0 0; font-size:var(--fs-s); font-weight:600; color:var(--muted)}
 .list .wrow.view{flex:none; border:1px solid var(--line); border-radius:8px; box-shadow:inset 4px 0 0 var(--wc), var(--shadow)}
 
 /* Kapazitätsgrenze */
 .capline{
-  flex:none; display:flex;align-items:center;gap:10px; margin:6px 0 2px; color:var(--orange);
-  font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  flex:none; display:flex;align-items:center;gap:10px; margin:6px 0 2px; color:var(--orange-ink);
+  font-size:var(--fs-xs); font-weight:600;
 }
-.capline::before,.capline::after{content:""; flex:1; border-top:2px dashed color-mix(in srgb, var(--orange) 60%, transparent)}
+.capline::before,.capline::after{content:""; flex:1; border-top:2px dashed color-mix(in srgb, var(--orange) 55%, transparent)}
 .list.dnd .capline{visibility:hidden}
 
 .empty{margin:auto; text-align:center; color:var(--muted); padding:40px}
-.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:6px}
+.empty b{display:block;color:var(--ink);font-size:var(--fs-m);margin-bottom:6px}
 
 /* ---------- Seitenleiste ---------- */
-.side{min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding-right:2px}
+.side{min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding:0 2px 20px 0}
 .card{flex:none; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
-.card h3{margin:0 0 12px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; display:flex; align-items:center}
-.card h3 .lnk{margin-left:auto; border:0; background:none; padding:0; font-size:11.5px; letter-spacing:0; text-transform:none; font-weight:600; color:var(--indigo)}
+.card h3{margin:0 0 12px; font-size:var(--fs-s); color:var(--ink); font-weight:700; display:flex; align-items:center; gap:8px}
+.card h3 .lnk{margin-left:auto; border:0; background:none; padding:0; font-size:var(--fs-xs); font-weight:600; color:var(--indigo)}
 .card h3 .lnk:hover{text-decoration:underline}
 
-.cap-in{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-.cap-in input{width:64px; height:32px; padding:0 8px; border:1px solid var(--line); border-radius:6px; font-weight:600; color:var(--ink); text-align:right}
-.bar{height:8px; background:#e6ecf0; border-radius:99px; overflow:hidden; margin:12px 0 8px; display:flex}
+.attn{display:flex; flex-direction:column; gap:6px}
+.attn-item{
+  --ac:var(--line-strong);
+  display:block; width:100%; text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px;
+  padding:8px 10px 8px 12px; box-shadow:inset 3px 0 0 var(--ac);
+}
+.attn-item:hover{border-color:var(--line-strong); background:var(--surface-2)}
+.attn-item b{display:block; font-size:var(--fs-s); font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.attn-item span{display:block; font-size:var(--fs-xs); color:var(--muted); margin-top:1px}
+.attn-item.sev-0{--ac:var(--red)}
+.attn-item.sev-0 span{color:var(--red-ink)}
+.attn-item.sev-1{--ac:var(--amber)}
+.attn-item.sev-1 span{color:var(--amber-ink)}
+.attn-item.sev-2{--ac:var(--line-strong)}
+.attn-more{font-size:var(--fs-xs); color:var(--muted); padding:2px 2px 0}
+.attn-ok{font-size:var(--fs-s); color:var(--green-ink); background:#eef8f1; border:1px solid #cbe9d5; border-radius:8px; padding:9px 12px}
+
+.kpis{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px}
+.kpis > div{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:8px 10px}
+.kpis b{display:block; font-size:var(--fs-l); font-weight:700; color:var(--navy); line-height:1.2}
+.kpis span{display:block; font-size:var(--fs-xs); line-height:1.3; color:var(--muted)}
+.cap-in{display:flex;align-items:center;gap:8px;font-size:var(--fs-s);color:var(--muted)}
+.cap-in input{width:60px; height:30px; padding:0 8px; border:1px solid var(--line); border-radius:6px; font-weight:600; color:var(--ink); text-align:right}
+.bar{height:8px; background:#e6ecf0; border-radius:99px; overflow:hidden; margin:10px 0 8px; display:flex}
 .bar span{height:100%}
-.small{font-size:12.5px;color:var(--muted)}
+.small{font-size:var(--fs-xs);color:var(--muted)}
 .small b{color:var(--ink)}
 
-.rows{display:flex;flex-direction:column;gap:9px}
-.row{display:grid; grid-template-columns:12px minmax(0,1fr) 46px 46px; gap:8px; align-items:center; font-size:13px}
-.row .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
-.row .n{color:var(--muted);font-size:12px;text-align:right}
-.row .p{font-size:12.5px;font-weight:700;text-align:right}
-.dlrow{display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:10px; align-items:center; font-size:13px}
-.dlrow .d{font-weight:600; font-size:12px; text-align:center; border-radius:6px; padding:3px 0; background:var(--surface-2); border:1px solid var(--line)}
-.dlrow .t{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.dlrow .t b{font-weight:600}
-.dlrow .r{font-size:11.5px; color:var(--muted); white-space:nowrap}
-.dlrow.soon .d{background:#fff6e5; border-color:#ffe0a3; color:#8a5a00}
-.dlrow.overdue .d{background:#fff0f2; border-color:#ffd0d7; color:#a3283b}
-.dlrow.overdue .r{color:#d0324b; font-weight:600}
-button.dlrow{border:0; background:none; padding:0; text-align:left; width:100%}
-button.dlrow:hover .t{color:var(--indigo)}
-.warn{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:12.5px; background:#fff1f3; color:#a3283b; border:1px solid #ffd0d7}
-.ok{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:12.5px; background:#eef8f1; color:#1b6b3a; border:1px solid #cbe9d5}
+.prow{display:grid; grid-template-columns:10px minmax(0,1fr) auto auto; gap:10px; align-items:center; font-size:var(--fs-s); padding:3px 0}
+.prow .sw{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.prow .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.prow .n{color:var(--muted); font-size:var(--fs-xs)}
+.prow .p{font-weight:700; font-size:var(--fs-xs); min-width:42px; text-align:right}
 
-.keys{font-size:12.5px;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:7px 12px;align-items:center}
-kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--ink);white-space:nowrap}
+.keys{font-size:var(--fs-s);color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:9px 16px;align-items:center}
+kbd{font-family:var(--font);font-size:var(--fs-xs);font-weight:600;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--ink);white-space:nowrap}
 
-/* ---------- Projektübersicht (Dialog) ---------- */
+/* ---------- Dialoge ---------- */
 .dlg{
   width:min(900px, 94vw); max-height:86vh; border:0; border-radius:14px; padding:0;
   box-shadow:0 30px 80px rgba(0,30,50,.35); color:var(--ink);
 }
 .dlg::backdrop{background:rgba(0,30,45,.45)}
 .dlg-head{display:flex; align-items:center; gap:12px; padding:18px 22px 4px}
-.dlg-head h2{margin:0; font-size:18px; color:var(--navy)}
-.dlg-sub{padding:0 22px 14px; font-size:13px; color:var(--muted); border-bottom:1px solid var(--line)}
-.icon-btn{margin-left:auto; width:32px; height:32px; border-radius:8px; border:0; background:none; font-size:20px; color:var(--muted)}
+.dlg-head h2{margin:0; font-size:var(--fs-l); color:var(--navy)}
+.dlg-sub{padding:0 22px 14px; font-size:var(--fs-s); color:var(--muted); border-bottom:1px solid var(--line)}
+.icon-btn{margin-left:auto; width:32px; height:32px; border-radius:8px; border:0; background:none; font-size:var(--fs-l); color:var(--muted)}
 .icon-btn:hover{background:var(--surface-2); color:var(--ink)}
 .pm-body{padding:8px 22px 4px; overflow:auto; max-height:calc(86vh - 190px)}
 .pm-grid{display:grid; grid-template-columns:44px minmax(180px,1fr) 70px 70px 84px 80px 84px 44px; align-items:center}
-.pm-head{font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); height:32px}
+.pm-head{font-size:var(--fs-xs); font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); height:32px}
 .pm-head > span{padding:0 8px; white-space:nowrap}
 .pm-row{min-height:50px; border-top:1px solid var(--line)}
 .pm-row > *{margin:0 4px}
 .pm-head .num,.pm-row .num{text-align:right; padding-right:12px}
 .pm-row .num{font-weight:600}
-.pm-row .num.zero{color:var(--faint); font-weight:500}
+.pm-row .num.zero{color:var(--muted-2); font-weight:500}
 .pm-sw{width:24px; height:24px; border-radius:6px; border:2px solid #fff; box-shadow:0 0 0 1px var(--line-strong); background:var(--c); padding:0; justify-self:center}
 .pm-sw:hover{box-shadow:0 0 0 2px var(--navy)}
 .pm-name{height:34px; border:1px solid transparent; border-radius:7px; padding:0 10px; font-weight:600; background:transparent; min-width:0}
@@ -484,12 +520,12 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 .pm-move button,.pm-del{width:30px; height:30px; border-radius:7px; border:1px solid var(--line); background:#fff; color:var(--muted); padding:0}
 .pm-move button:hover:not([disabled]){border-color:var(--navy); color:var(--navy)}
 .pm-move button[disabled]{opacity:.35}
-.pm-del{border-color:transparent; font-size:18px; justify-self:center}
-.pm-del:hover{background:#fde8eb; color:var(--red)}
+.pm-del{border-color:transparent; font-size:var(--fs-l); justify-self:center}
+.pm-del:hover{background:#fde8eb; color:var(--red-ink)}
 .pm-palette{display:flex; gap:8px; padding:4px 0 12px 52px; flex-wrap:wrap}
 .pm-palette button{width:26px; height:26px; border-radius:7px; border:2px solid #fff; box-shadow:0 0 0 1px var(--line); background:var(--c); padding:0}
 .pm-palette button.on,.pm-palette button:hover{box-shadow:0 0 0 2px var(--navy)}
-.pm-confirm{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 12px 52px; padding:10px 12px; border-radius:8px; background:#fff1f3; border:1px solid #ffd0d7; font-size:13px; color:#7a1f2e}
+.pm-confirm{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:0 0 12px 52px; padding:10px 12px; border-radius:8px; background:#fff1f3; border:1px solid #ffd0d7; font-size:var(--fs-s); color:#7a1f2e}
 .pm-confirm > span{flex-basis:100%}
 .pm-confirm select{height:32px; border:1px solid var(--line-strong); border-radius:7px; padding:0 8px; background:#fff}
 .pm-foot{display:flex; gap:10px; align-items:center; padding:14px 22px 18px; border-top:1px solid var(--line); background:var(--surface-2); border-radius:0 0 14px 14px}
@@ -497,21 +533,10 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 .pm-foot input:focus{outline:none; border-color:var(--navy)}
 .pm-foot .small{margin-left:auto}
 
-/* ---------- Toast, Konfetti, Feier ---------- */
-.toast{
-  position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
-  background:var(--navy); color:#fff; padding:11px 18px; border-radius:10px; box-shadow:var(--shadow-lift);
-  opacity:0; transition:.25s; pointer-events:none; font-size:13.5px; font-weight:500; z-index:300;
-}
-.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
-.toast{display:flex; align-items:center; gap:16px}
-.toast.has-action{pointer-events:auto}
-.toast button{border:0; background:none; padding:0; color:var(--amber); font-weight:700}
-.toast button:hover{text-decoration:underline}
-
 .welcome{width:min(620px, 94vw)}
 .wl-body{padding:30px 32px 24px}
-.wl-body h2{margin:14px 0 6px; font-size:22px; color:var(--navy)}
+.wl-body h2{margin:14px 0 6px; font-size:var(--fs-xl); color:var(--navy)}
+.wl-body h2:focus{outline:none}
 .wl-body p{margin:0; color:var(--muted); line-height:1.5}
 .wl-actions{display:flex; flex-direction:column; gap:10px; margin:20px 0 16px}
 .wl-opt{
@@ -519,42 +544,59 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
   padding:14px 16px; border-radius:10px; border:1px solid var(--line); background:#fff;
   box-shadow:inset 4px 0 0 var(--c, var(--line-strong));
 }
-.wl-opt b{font-size:15px; color:var(--ink)}
-.wl-opt span{font-size:13px; color:var(--muted)}
+.wl-opt b{font-size:var(--fs-m); color:var(--ink)}
+.wl-opt span{font-size:var(--fs-s); color:var(--muted)}
 .wl-opt:hover{border-color:var(--navy); background:var(--surface-2)}
 .wl-opt:focus{outline:none}
 .wl-opt:focus-visible{outline:2px solid var(--navy); outline-offset:2px}
-.wl-body h2:focus{outline:none}
 .bak-row{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 0; border-top:1px solid var(--line)}
 .bak-row:first-child{border-top:0}
+
+/* ---------- Toast, Konfetti, Feier ---------- */
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+  display:flex; align-items:center; gap:16px;
+  background:var(--navy); color:#fff; padding:11px 18px; border-radius:10px; box-shadow:var(--shadow-lift);
+  opacity:0; transition:.25s; pointer-events:none; font-size:var(--fs-s); font-weight:500; z-index:300;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.has-action{pointer-events:auto}
+.toast button{border:0; background:none; padding:0; color:var(--amber); font-weight:700}
+.toast button:hover{text-decoration:underline}
 #confetti{position:fixed; inset:0; pointer-events:none; z-index:250}
 .celebrate{position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:240; opacity:0}
 .celebrate.show{animation:cbFade 2.6s ease forwards}
 .cb-card{
-  text-align:center; background:rgba(0,63,92,.94); color:#fff; padding:26px 44px 24px; border-radius:18px;
+  text-align:center; background:rgba(0,63,92,.95); color:#fff; padding:24px 44px 22px; border-radius:18px;
   box-shadow:0 30px 80px rgba(0,30,50,.4); transform:scale(.7);
 }
 .celebrate.show .cb-card{animation:cbPop 2.6s cubic-bezier(.2,1.4,.4,1) forwards}
-.cb-kicker{font-size:12px; letter-spacing:.2em; font-weight:700; color:var(--amber)}
-.cb-title{font-family:var(--quote); font-style:italic; font-weight:600; font-size:40px; margin-top:4px}
-.cb-sub{font-size:14px; color:#b7d0dc; margin-top:6px; max-width:520px}
+.cb-kicker{font-size:var(--fs-xs); font-weight:700; color:var(--amber)}
+.cb-title{font-family:var(--quote); font-style:italic; font-weight:600; font-size:var(--fs-xl); margin-top:4px}
+.cb-sub{font-size:var(--fs-s); color:#b7d0dc; margin-top:6px; max-width:520px}
 @keyframes cbFade{0%{opacity:0} 10%{opacity:1} 80%{opacity:1} 100%{opacity:0}}
 @keyframes cbPop{0%{transform:scale(.7)} 15%{transform:scale(1.04)} 25%{transform:scale(1)} 100%{transform:scale(1)}}
 
 /* ---------- Bildschirmgrößen ---------- */
 @media (max-width:1560px){
-  :root{--pad:11px; --pt:29px; --pt-gap:4px; --dot:20px; --dot-gap:7px; --c-rank:60px; --c-dl:118px; --c-done:50px; --c-del:36px}
-  .main{grid-template-columns:minmax(0,1fr) 270px}
-  .ot-title{font-size:22px}
-  .bq-sub .de,.note-chip,.tab .count{display:none}
+  :root{--pad:11px; --c-rank:54px; --c-urg:144px; --c-pts:92px; --c-dl:116px; --c-done:50px; --c-del:36px}
+  .main{grid-template-columns:minmax(0,1fr) 280px}
+  .ot-cite,.tab .count{display:none}
 }
+/* Laptop: Seitenleiste wird zur Schublade, Hinweise bleiben über den Knopf erreichbar */
 @media (max-width:1440px){
-  .main{grid-template-columns:1fr}
-  .side{display:none}
+  .main{grid-template-columns:1fr; padding-right:24px}
+  .side{
+    position:fixed; top:58px; right:0; bottom:0; width:340px; padding:16px; background:var(--bg);
+    box-shadow:-12px 0 30px rgba(0,30,50,.18); z-index:90; transform:translateX(105%); transition:transform .25s ease;
+  }
+  body.side-open .side{transform:none}
+  #sideBtn{display:inline-flex}
 }
 @media (max-width:1020px){
   :root{--cols: var(--c-handle) var(--c-marker) var(--c-rank) minmax(180px,1fr) 0 var(--c-urg) var(--c-pts) var(--c-dl) var(--c-done) var(--c-del)}
   .note-cell,#colhead > div:nth-child(5){display:none}
+  .ot-quote{display:none}
 }
 </style>
 </head>
@@ -562,15 +604,20 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 
 <header class="topbar">
   <div class="brand">
-    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+    <svg width="24" height="24" viewBox="0 0 26 26" aria-hidden="true">
       <rect x="2" y="3"  width="22" height="5" rx="1.5" fill="#f9596f"/>
       <rect x="2" y="10.5" width="22" height="5" rx="1.5" fill="#ffa600"/>
       <rect x="2" y="18" width="22" height="5" rx="1.5" fill="#238b4a"/>
     </svg>
-    Priorisierer 3000 <small>v1.0</small>
+    Priorisierer 3000 <small>v1.1</small>
   </div>
   <div class="spacer"></div>
   <button class="status" id="status" data-s="none" type="button"><span class="led"></span><span id="statusText">Nicht verknüpft</span></button>
+  <button class="btn btn-ghost" id="sideBtn" type="button" aria-controls="side" aria-expanded="false">Hinweise <span class="badge" id="sideBadge">0</span></button>
+  <button class="btn btn-ghost btn-icon" id="densBtn" type="button" title="Kompakte Ansicht" aria-pressed="false">
+    <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 4h12M3 7.3h12M3 10.6h12M3 14h12"/></svg>
+  </button>
+  <button class="btn btn-ghost btn-icon" id="helpBtn" type="button" title="Bedienung (Taste ?)" aria-label="Bedienung">?</button>
   <div class="menu-wrap">
     <button class="btn btn-ghost" id="fileBtn" type="button">Datei ▾</button>
     <div class="menu" id="fileMenu" role="menu">
@@ -593,25 +640,21 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 
 <main class="main">
   <div class="left">
-    <!-- Fokus-Frage aus dem Buch -->
-    <figure class="book-quote">
-      <span class="mark" aria-hidden="true">“</span>
-      <div>
-        <blockquote class="bq-text">What’s the ONE Thing I can do such that by doing it everything else will be easier or unnecessary?</blockquote>
-        <figcaption class="bq-sub">Gary Keller &amp; Jay Papasan, <i>The ONE Thing</i><span class="de"> · Was ist die EINE Sache, durch die alles andere einfacher oder überflüssig wird?</span></figcaption>
-      </div>
-    </figure>
-
-    <!-- THE ONE THING -->
+    <!-- THE ONE THING, mit der Fokus-Frage aus dem Buch -->
     <section class="onething" id="oneThing" aria-label="The One Thing">
       <div class="ot-bar"></div>
       <div class="ot-body">
-        <div class="ot-kicker"><span class="star">★</span> The One Thing · heute</div>
-        <div class="ot-title" id="otTitle">–</div>
-        <div class="ot-meta" id="otMeta"></div>
+        <div class="ot-top">
+          <span class="ot-kicker"><span class="star">★</span> The One Thing · heute</span>
+          <q class="ot-quote" title="Was ist die EINE Sache, durch die alles andere einfacher oder überflüssig wird?">What’s the ONE Thing I can do such that by doing it everything else will be easier or unnecessary?</q>
+          <span class="ot-cite">Gary Keller &amp; Jay Papasan</span>
+        </div>
+        <div class="ot-main">
+          <div class="ot-title" id="otTitle">–</div>
+          <div class="ot-meta" id="otMeta"></div>
+        </div>
       </div>
       <div class="ot-side">
-        <div class="ot-stats" id="otStats"></div>
         <button class="ot-done" id="otDone" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
           Erledigt
@@ -622,7 +665,7 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
     <section class="board" aria-label="Liste">
       <div class="colhead" id="colhead">
         <div></div><div></div><div class="c">Prio</div><div>Aufgabe</div><div>Notiz / nächster Schritt</div>
-        <div class="c">Ampel</div><div class="c">Aufwand (Story Points)</div><div class="c">Deadline</div><div class="c" title="Erledigt">✓</div><div></div>
+        <div class="c">Ampel</div><div class="c">Aufwand</div><div class="c">Deadline</div><div class="c" title="Erledigt">✓</div><div></div>
       </div>
       <div class="wtool" id="waitTool" hidden>
         <span class="title-s">Warte auf</span>
@@ -631,57 +674,58 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
         <button class="btn btn-navy btn-sm" id="addWaitBtn" type="button">＋ Warte-Eintrag</button>
       </div>
       <div class="wrow view head" id="waitHead" hidden>
-        <span></span><span>Wer</span><span>Was brauche ich?</span><span>Projekt / Aufgabe</span><span style="text-align:center">Angefragt</span><span style="text-align:center">Rückmeldung bis</span><span>Rückmeldung / Ergebnis</span><span></span>
+        <span></span><span>Wer</span><span>Was brauche ich?</span><span>Projekt / Aufgabe</span><span style="text-align:center">Angefragt</span><span style="text-align:center">Stichtag</span><span>Rückmeldung / Ergebnis</span><span></span>
       </div>
       <div class="list" id="list"></div>
     </section>
   </div>
 
-  <aside class="side">
+  <aside class="side" id="side" aria-label="Lage">
     <section class="card">
-      <h3>Kapazität</h3>
-      <label class="cap-in"><input type="number" id="capInput" min="1" step="1"> Story Points pro Woche</label>
+      <h3>Heute klären <span class="badge" id="attnCount">0</span></h3>
+      <div class="attn" id="attn"></div>
+    </section>
+
+    <section class="card">
+      <h3>Diese Woche</h3>
+      <div class="kpis">
+        <div><b id="kOpen">0</b><span>offene<br>Aufgaben</span></div>
+        <div><b id="kSp">0</b><span>Story<br>Points</span></div>
+        <div><b id="kDone">0</b><span>heute<br>erledigt</span></div>
+      </div>
+      <label class="cap-in">Kapazität <input type="number" id="capInput" min="1" step="1"> SP pro Woche</label>
       <div class="bar" id="capBar"></div>
       <div class="small" id="capText"></div>
     </section>
 
     <section class="card">
-      <h3>Warte auf <button class="lnk" type="button" data-goto="waits">Alle anzeigen</button></h3>
-      <div class="rows" id="waitRows"></div>
-      <div id="waitHint"></div>
-    </section>
-
-    <section class="card">
-      <h3>Nächste Deadlines</h3>
-      <div class="rows" id="dlRows"></div>
-      <div id="dlHint"></div>
-    </section>
-
-    <section class="card">
-      <h3>Ampel-Lage</h3>
-      <div class="rows" id="urgRows"></div>
-      <div id="urgHint"></div>
-    </section>
-
-    <section class="card">
       <h3>Projekte <button class="lnk" type="button" data-pm>Verwalten</button></h3>
-      <div class="rows" id="projRows"></div>
-    </section>
-
-    <section class="card">
-      <h3>Bedienung</h3>
-      <div class="keys">
-        <span>⋮⋮ ziehen</span><span>Streifen sortieren, oben = Prio 1</span>
-        <span><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd></span><span>Streifen verschieben</span>
-        <span><kbd>N</kbd></span><span>Neue Aufgabe</span>
-        <span>✓ Haken</span><span>Erledigt, wird gefeiert</span>
-        <span>Warten auf</span><span>Unter dem Titel aufklappen</span>
-        <span><kbd>Strg</kbd> <kbd>Z</kbd></span><span>Letzte Aktion rückgängig</span>
-        <span>Farbbalken</span><span>Klick schaltet die Ampel weiter</span>
-      </div>
+      <div id="projRows"></div>
     </section>
   </aside>
 </main>
+
+<!-- Auswahl für Ampel und Aufwand -->
+<div class="pop" id="pop" role="dialog" aria-label="Auswahl" hidden></div>
+
+<!-- Bedienung -->
+<dialog class="dlg" id="helpDlg" aria-labelledby="helpTitle" style="width:min(560px,94vw)">
+  <div class="dlg-head"><h2 id="helpTitle">Bedienung</h2><button class="icon-btn" type="button" data-close aria-label="Schließen">×</button></div>
+  <div class="pm-body" style="padding:16px 22px 22px">
+    <div class="keys">
+      <span>⋮⋮ ziehen</span><span>Streifen sortieren, oben ist Prio 1</span>
+      <span><kbd>Alt</kbd> <kbd>↑</kbd> <kbd>↓</kbd></span><span>Streifen verschieben</span>
+      <span><kbd>N</kbd></span><span>Neue Aufgabe</span>
+      <span>Ampel, Aufwand</span><span>Auf den Wert im Streifen klicken, dann auswählen</span>
+      <span>Farbbalken links</span><span>Klick schaltet die Ampel weiter</span>
+      <span>✓ Haken</span><span>Erledigt, wird gefeiert</span>
+      <span>Warten auf</span><span>Unter dem Titel aufklappen</span>
+      <span><kbd>Strg</kbd> <kbd>Z</kbd></span><span>Letzte Aktion rückgängig</span>
+      <span>Symbol ☰ oben</span><span>Kompakte Ansicht ein und aus</span>
+      <span><kbd>?</kbd></span><span>Diese Hilfe</span>
+    </div>
+  </div>
+</dialog>
 
 <!-- Projektübersicht -->
 <dialog class="dlg" id="projDlg" aria-labelledby="pmTitle">
@@ -727,13 +771,13 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
 
 <div class="celebrate" id="celebrate">
   <div class="cb-card">
-    <div class="cb-kicker">★ THE ONE THING ★</div>
+    <div class="cb-kicker">★ The One Thing ★</div>
     <div class="cb-title">erledigt!</div>
     <div class="cb-sub" id="cbSub"></div>
   </div>
 </div>
 <canvas id="confetti"></canvas>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* =========================================================
@@ -741,20 +785,20 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
    ========================================================= */
 const FIB = [1,2,3,5,8,13,21];
 const URG = {
-  red:    {label:'Dringend',           color:'#f9596f'},
-  yellow: {label:'Bald',               color:'#ffa600'},
-  green:  {label:'Kann warten',        color:'#238b4a'},
-  wait:   {label:'Wartet / blockiert', color:'#674f95'},
+  red:    {label:'Dringend',           short:'Dringend',    hint:'heute oder morgen', color:'#f9596f'},
+  yellow: {label:'Bald',               short:'Bald',        hint:'diese Woche',       color:'#ffa600'},
+  green:  {label:'Kann warten',        short:'Kann warten', hint:'später',            color:'#238b4a'},
+  wait:   {label:'Wartet / blockiert', short:'Blockiert',   hint:'hängt an anderen',  color:'#674f95'},
 };
 const URG_ORDER = ['red','yellow','green','wait'];
-const PT_COLOR = {1:'#238b4a',2:'#569933',3:'#8aa40e',5:'#c2a900',8:'#ffa600',13:'#ff7a47',21:'#f9596f'};
-const PT_INK   = {1:'#fff',2:'#fff',3:'#16252f',5:'#16252f',8:'#16252f',13:'#16252f',21:'#fff'};
-const PICK_COLORS = ['#003f5c','#31497e','#674f95','#a14e9a','#d44c8d','#04565c','#006960','#007b5a','#569933','#8aa40e','#c2a900','#ff7a47'];
+/* Projektfarben: nur kühle Töne, damit sie nie mit der Ampel verwechselt werden */
+const PICK_COLORS = ['#31497e','#006960','#a14e9a','#003f5c','#5b7a99','#04565c'];
 const CONFETTI_COLORS = ['#f9596f','#ffa600','#238b4a','#569933','#8aa40e','#ff7a47','#d44c8d','#674f95','#31497e','#c2a900','#006960'];
 const PRAISE = ['Erledigt. Stark!','Abgehakt. Weiter so.','Ein Streifen weniger auf dem Radar.','Sauber gelandet.','Momentum. Weiter geht’s.','Check. Das fühlt sich gut an.'];
 const LS_KEY = 'priorisierer3000.cache';
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const CLOCK_SVG = '<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg>';
+const CHEV_SVG = '<svg class="chev" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M1.5 3.5 5 7l3.5-3.5"/></svg>';
 const SLIDERS_SVG = '<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5h7M12.5 4.5H14M2 11.5h1.5M7 11.5h7"/><circle cx="10.7" cy="4.5" r="1.7"/><circle cx="5.3" cy="11.5" r="1.7"/></svg>';
 
 const $ = s => document.querySelector(s);
@@ -769,7 +813,7 @@ const today = () => isoDate(new Date());
 const addDays = n => { const d = new Date(); d.setDate(d.getDate()+n); return isoDate(d); };
 const parseIso = iso => { const [y,m,d] = iso.split('-').map(Number); return new Date(y,m-1,d); };
 function daysUntil(iso){ const t = parseIso(iso); const n = new Date(); n.setHours(0,0,0,0); return Math.round((t-n)/86400000); }
-const fmtDate = iso => parseIso(iso).toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit'});
+const fmtDate = iso => { const d = parseIso(iso); return `${d.toLocaleDateString('de-DE',{weekday:'short'}).replace('.','')} ${z2(d.getDate())}.${z2(d.getMonth()+1)}.`; };
 const fmtShort = iso => parseIso(iso).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
 function relDays(n){
   if(n < -1) return `${-n} Tage überfällig`;
@@ -778,6 +822,7 @@ function relDays(n){
   if(n === 1) return 'morgen';
   return `in ${n} Tagen`;
 }
+const relNear = n => n <= 7 ? relDays(n) : '';     // relative Angabe nur, wenn sie etwas aussagt
 function agoDays(n){
   if(n === 0) return 'heute';
   if(n === -1) return 'gestern';
@@ -795,7 +840,7 @@ function demoData(){
     {id:'p1', name:'Tagesgeschäft',   color:'#31497e'},
     {id:'p2', name:'Digitalisierung', color:'#a14e9a'},
     {id:'p3', name:'Team & Führung',  color:'#006960'},
-    {id:'p4', name:'Controlling',     color:'#d44c8d'},
+    {id:'p4', name:'Controlling',     color:'#5b7a99'},
   ];
   const T = [
     ['Budgetplanung 2027 abgeben','Zahlen aus Controlling fehlen noch','p4','red',8,3],
@@ -840,6 +885,10 @@ function normalize(d){
   const projects = Array.isArray(d.projects) ? d.projects.map((p,i)=>({
     id:String(p.id ?? uid()), name:String(p.name ?? 'Projekt'), color:p.color || PICK_COLORS[i % PICK_COLORS.length]
   })) : [];
+  // Warme Farben (Ampel-ähnlich) aus älteren Versionen auf kühle Projektfarben umstellen
+  const usedC = new Set();
+  projects.forEach(p=>{ p.color = String(p.color||'').toLowerCase(); if(PICK_COLORS.includes(p.color) && !usedC.has(p.color)) usedC.add(p.color); else p.color = null; });
+  projects.forEach(p=>{ if(!p.color){ p.color = PICK_COLORS.find(c=>!usedC.has(c)) || PICK_COLORS[usedC.size % PICK_COLORS.length]; usedC.add(p.color); } });
   const pids = new Set(projects.map(p=>p.id));
   const tasks = Array.isArray(d.tasks) ? d.tasks.map(t=>({
     id:String(t.id ?? uid()), title:String(t.title ?? ''), note:String(t.note ?? ''),
@@ -1119,7 +1168,7 @@ async function boot(){
 /* =========================================================
    Bausteine
    ========================================================= */
-function dateField(field, value, {empty='＋ Datum', tone=true, rel=relDays} = {}){
+function dateField(field, value, {empty='＋ Datum', tone=true, rel=relNear} = {}){
   let inner, cls = '';
   if(value){
     const n = daysUntil(value);
@@ -1153,7 +1202,7 @@ function waitRowHTML(w, mode){
       }</select></span>
     </span>`;
   }
-  const dueRel = rec ? () => (w.receivedAt ? `erhalten ${fmtShort(w.receivedAt)}` : 'erhalten') : relDays;
+  const dueRel = rec ? () => (w.receivedAt ? `erhalten ${fmtShort(w.receivedAt)}` : 'erhalten') : relNear;
   return `<div class="wrow ${mode} ${rec?'rec':''}" data-wait="${esc(w.id)}" style="--wc:${color}">
     <span class="wc"><button class="w-check ${rec?'on':''}" type="button" title="${rec?'Wieder öffnen':'Rückmeldung erhalten'}" aria-label="${rec?'Wieder öffnen':'Rückmeldung erhalten'}">${CHECK_SVG}</button></span>
     <span><input class="w-in who" data-k="who" value="${esc(w.who)}" placeholder="Wer?"></span>
@@ -1175,13 +1224,13 @@ function waitChip(t){
   if(op.length){ label = `Wartet auf ${op.length}${od ? ' · nachfassen' : ''}`; cls = od ? 'alert' : 'active'; }
   else if(ws.length){ label = `${ws.length} ${ws.length===1?'Rückmeldung':'Rückmeldungen'}`; cls = ''; }
   else { label = 'Warten auf …'; cls = 'ghost'; }
-  return `<button class="wchip ${cls} ${isOpen?'open':''}" type="button" aria-expanded="${isOpen}">${CLOCK_SVG}${label}<span class="chev">▾</span></button>`;
+  return `<button class="wchip ${cls} ${isOpen?'open':''}" type="button" aria-expanded="${isOpen}">${CLOCK_SVG}${label}${CHEV_SVG}</button>`;
 }
 
 function panelHTML(t){
   const ws = waitsOf(t).sort(sortWaits);
   return `<div class="wait-panel">
-    <div class="wrow panel head"><span></span><span>Wer</span><span>Was brauche ich?</span><span style="text-align:center">Angefragt</span><span style="text-align:center">Rückmeldung bis</span><span>Rückmeldung / Ergebnis</span><span></span></div>
+    <div class="wrow panel head"><span></span><span>Wer</span><span>Was brauche ich?</span><span style="text-align:center">Angefragt</span><span style="text-align:center">Stichtag</span><span>Rückmeldung / Ergebnis</span><span></span></div>
     ${ws.map(w=>waitRowHTML(w,'panel')).join('') || '<div class="w-empty">Noch keine Warte-Einträge zu dieser Aufgabe.</div>'}
     <button class="w-add" type="button">＋ Warte-Eintrag</button>
   </div>`;
@@ -1225,7 +1274,6 @@ const doneTodayCount = () => state.tasks.filter(t=>t.done && t.doneAt && isoDate
 function renderOneThing(){
   const t = oneThing();
   const box = $('#oneThing'), title = $('#otTitle');
-  const doneToday = doneTodayCount();
   if(t){
     const p = projById(t.project);
     box.style.setProperty('--otc', URG[t.urgency].color);
@@ -1233,12 +1281,10 @@ function renderOneThing(){
     title.classList.toggle('is-empty', !t.title);
     title.title = t.title;
     let meta = `<span class="chip"><span class="sw" style="--c:${esc(p?.color||'#c3cfd8')}"></span>${esc(p?.name||'Ohne Projekt')}</span>`;
-    meta += `<span class="chip"><span class="sw" style="--c:${URG[t.urgency].color};border-radius:50%"></span>${URG[t.urgency].label}</span>`;
-    meta += `<span class="chip">Aufwand <b>${t.points ?? '?'} SP</b></span>`;
-    if(t.deadline){ const n = daysUntil(t.deadline); meta += `<span class="chip ${dlClass(n)}">Deadline <b>${fmtDate(t.deadline)}</b> · ${relDays(n)}</span>`; }
+    meta += `<span class="chip"><b>${t.points ?? '?'}</b> SP</span>`;
+    if(t.deadline){ const n = daysUntil(t.deadline), r = relNear(n); meta += `<span class="chip ${dlClass(n)}">Deadline <b>${fmtDate(t.deadline)}</b>${r ? ` · ${r}` : ''}</span>`; }
     const ow = waitsOf(t).filter(w=>w.status==='open');
-    if(ow.length) meta += `<span class="chip wait">${CLOCK_SVG}Wartet auf ${ow.length} ${ow.length===1?'Rückmeldung':'Rückmeldungen'}</span>`;
-    if(t.note) meta += `<span class="chip note-chip" style="max-width:380px;overflow:hidden;text-overflow:ellipsis">${esc(t.note)}</span>`;
+    if(ow.length) meta += `<span class="chip wait">${CLOCK_SVG}wartet auf ${ow.length}</span>`;
     $('#otMeta').innerHTML = meta;
     $('#otDone').disabled = false;
   }else{
@@ -1248,10 +1294,6 @@ function renderOneThing(){
     $('#otMeta').innerHTML = '';
     $('#otDone').disabled = true;
   }
-  const left = openTasks().length;
-  $('#otStats').innerHTML =
-    `<span><b>${doneToday}</b> heute erledigt</span>` +
-    `<span><b>${left}</b> offen</span>`;
   const id = t?.id || null;
   if(lastOneId !== null && id !== lastOneId){ box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap'); }
   lastOneId = id;
@@ -1259,27 +1301,30 @@ function renderOneThing(){
 
 function stripHTML(t, i, oneId){
   const p = projById(t.project);
+  const u = URG[t.urgency];
   const isOne = !t.done && t.id === oneId;
-  const urg = URG_ORDER.map(k=>`<button type="button" data-u="${k}" class="${t.urgency===k?'on':''}" style="--c:${URG[k].color}" title="${URG[k].label}" aria-label="${URG[k].label}"></button>`).join('');
-  const pts = FIB.map(n=>`<button type="button" data-p="${n}" class="${t.points===n?'on':''}" style="--pc:${PT_COLOR[n]};--pt-ink:${PT_INK[n]}" aria-label="${n} Story Points">${n}</button>`).join('');
   const rank = t.done
-    ? `<span>✓</span><small>${t.doneAt ? fmtShort(isoDate(new Date(t.doneAt))) : ''}</small>`
-    : `<span class="rn">${z2(i+1)}</span>${isOne ? '<small>ONE THING</small>' : ''}`;
+    ? `<span>✓</span><span class="dd">${t.doneAt ? fmtShort(isoDate(new Date(t.doneAt))) : ''}</span>`
+    : `<span class="rn">${z2(i+1)}</span>${isOne ? '<span class="star" title="The One Thing">★</span>' : ''}`;
+  const urgBtn = `<button class="val" type="button" data-pop="urg" aria-haspopup="true" aria-expanded="false" style="--c:${u.color}" title="Ampel ändern"><span class="dot"></span>${u.short}</button>`;
+  const ptsBtn = t.points==null
+    ? `<button class="val pts unset" type="button" data-pop="pts" aria-haspopup="true" aria-expanded="false" title="Aufwand schätzen">Schätzen</button>`
+    : `<button class="val pts" type="button" data-pop="pts" aria-haspopup="true" aria-expanded="false" title="Aufwand ändern"><b>${t.points}</b><span>SP</span></button>`;
   const doneBtn = t.done
     ? `<button class="restore" type="button" title="Wiederherstellen" aria-label="Wiederherstellen">↺</button>`
     : `<button class="check" type="button" title="Erledigt!" aria-label="Als erledigt markieren">${CHECK_SVG}</button>`;
   return `
-  <article class="strip ${isOne?'one':''} ${t.done?'is-done':''}" data-id="${esc(t.id)}" style="--urg:${URG[t.urgency].color}">
+  <article class="strip ${isOne?'one':''} ${t.done?'is-done':''}" data-id="${esc(t.id)}" style="--urg:${u.color}">
     <div class="handle" ${t.done?'':'tabindex="0"'} title="${t.done?'':'Ziehen oder Alt+↑/↓'}" aria-label="Verschieben">${t.done?'':'⋮⋮'}</div>
-    <div class="marker" title="Ampel: ${URG[t.urgency].label} (Klick schaltet weiter)"></div>
+    <div class="marker" title="Ampel: ${u.label} (Klick schaltet weiter)"></div>
     <div class="rank">${rank}</div>
     <div class="cell">
       <div class="title" contenteditable="plaintext-only" spellcheck="false" data-ph="Titel der Aufgabe …">${esc(t.title)}</div>
       <div class="proj" style="--pc:${esc(p?.color||'#c3cfd8')}"><span class="pdot"></span><select class="flat t-proj" aria-label="Projekt">${projOptions(t.project)}</select>${waitChip(t)}</div>
     </div>
     <div class="cell note-cell"><div class="note" contenteditable="plaintext-only" data-ph="Notiz, nächster Schritt, Kontext …">${esc(t.note)}</div></div>
-    <div class="cell urg">${urg}</div>
-    <div class="cell pts">${pts}</div>
+    <div class="cell vc">${urgBtn}</div>
+    <div class="cell vc">${ptsBtn}</div>
     <div class="cell dl">${dateField('deadline', t.deadline, {empty:'＋ Deadline'})}</div>
     <div class="done-cell">${doneBtn}</div>
     <div class="act"><button class="del" type="button" title="Löschen" aria-label="Löschen">×</button></div>
@@ -1348,11 +1393,55 @@ function renderWaits(){
   list.innerHTML = html;
 }
 
+/* Alles, was heute Aufmerksamkeit braucht – eine Liste, nach Schwere sortiert.
+   sev 0 = überfällig (rot), sev 1 = bald fällig / Konflikt (amber), sev 2 = Hinweis (neutral) */
+function attentionItems(){
+  const items = [];
+  const all = openTasks();
+  const {fit} = capFit(all);
+  const name = t => t.title || 'Ohne Titel';
+  all.forEach((t, i)=>{
+    if(!t.deadline) return;
+    const n = daysUntil(t.deadline);
+    if(n < 0) items.push({sev:0, kind:'task', id:t.id, title:name(t), sub:`Deadline ${relDays(n)}`});
+    else if(n <= 2) items.push({sev:1, kind:'task', id:t.id, title:name(t), sub: n===0 ? 'Deadline heute' : n===1 ? 'Deadline morgen' : 'Deadline in 2 Tagen'});
+    else if(n <= 7 && i >= fit) items.push({sev:1, kind:'task', id:t.id, title:name(t), sub:`Fällig ${relDays(n)}, liegt aber unter der Kapazitätsgrenze`});
+  });
+  state.waits.filter(w=>w.status==='open' && w.dueAt).forEach(w=>{
+    const n = daysUntil(w.dueAt), title = `${w.who || 'Unbekannt'}: ${w.what || '…'}`;
+    if(n < 0) items.push({sev:0, kind:'wait', id:w.id, title, sub: n===-1 ? 'Rückmeldung seit gestern überfällig, nachfassen' : `Rückmeldung seit ${-n} Tagen überfällig, nachfassen`});
+    else if(n <= 1) items.push({sev:1, kind:'wait', id:w.id, title, sub: n===0 ? 'Rückmeldung heute fällig' : 'Rückmeldung morgen fällig'});
+  });
+  const reds = all.filter(t=>t.urgency==='red').length;
+  if(all.length >= 4 && reds/all.length > 0.3)
+    items.push({sev:2, kind:'info', title:`${Math.round(reds/all.length*100)} % deiner Aufgaben sind rot`, sub:'Wenn alles dringend ist, ist nichts dringend. Maximal zwei bis drei.'});
+  const firstNonRed = all.findIndex(t=>t.urgency!=='red');
+  const lowRed = firstNonRed >= 0 ? all.slice(firstNonRed).find(t=>t.urgency==='red') : null;
+  if(lowRed) items.push({sev:2, kind:'task', id:lowRed.id, title:name(lowRed), sub:'Dringend, liegt aber unter weniger dringenden Aufgaben'});
+  const unest = all.slice(0, fit).filter(t=>t.points==null);
+  if(unest.length) items.push({sev:2, kind:'task', id:unest[0].id,
+    title: unest.length===1 ? `„${name(unest[0])}“ ist nicht geschätzt` : `${unest.length} Aufgaben dieser Woche sind nicht geschätzt`,
+    sub:'Ohne Schätzung stimmt die Kapazitätsgrenze nicht'});
+  return items.sort((a,b)=>a.sev-b.sev);
+}
+
 function renderSide(){
   const all = openTasks();
   const cap = state.settings.capacity;
 
-  // Kapazität
+  // Heute klären
+  const items = attentionItems();
+  const cls = items.some(i=>i.sev===0) ? 'alert' : items.some(i=>i.sev===1) ? 'warn' : items.length ? '' : 'good';
+  for(const id of ['#attnCount','#sideBadge']){ const b = $(id); b.textContent = items.length; b.className = 'badge ' + cls; }
+  $('#attn').innerHTML = items.length
+    ? items.slice(0,6).map(it=>`<button type="button" class="attn-item sev-${it.sev}" data-kind="${it.kind}" data-ref="${esc(it.id||'')}"><b>${esc(it.title)}</b><span>${esc(it.sub)}</span></button>`).join('')
+      + (items.length > 6 ? `<div class="attn-more">und ${items.length-6} weitere</div>` : '')
+    : `<div class="attn-ok">Nichts zu klären. Freie Bahn für die One Thing.</div>`;
+
+  // Diese Woche
+  $('#kOpen').textContent = all.length;
+  $('#kSp').textContent = sumPts(all);
+  $('#kDone').textContent = doneTodayCount();
   const {fit, cum} = capFit(all);
   const unest = all.filter(t=>t.points==null).length;
   let acc = 0;
@@ -1360,49 +1449,14 @@ function renderSide(){
     const w = Math.min(t.points||0, Math.max(0,cap-acc)); acc += w;
     return w ? `<span style="width:${w/cap*100}%;background:${URG[t.urgency].color};border-right:1px solid #fff"></span>` : '';
   }).join('');
-  $('#capText').innerHTML = `Die <b>Top ${fit}</b> Aufgaben passen in deine Woche (<b>${cum}</b> von ${cap} SP).<br>Gesamt im Backlog: <b>${sumPts(all)} SP</b>${unest?` · <b>${unest}</b> noch ungeschätzt`:''}.`;
-
-  // Warte auf
-  const ow = state.waits.filter(w=>w.status==='open').sort(sortWaits);
-  $('#waitRows').innerHTML = ow.slice(0,4).map(w=>{
-    const n = w.dueAt ? daysUntil(w.dueAt) : null;
-    return `<button class="dlrow ${n==null?'':dlClass(n)}" type="button" data-goto="waits"><span class="d">${w.dueAt?fmtShort(w.dueAt):'–'}</span><span class="t"><b>${esc(w.who||'?')}</b> · ${esc(w.what||'…')}</span><span class="r">${n==null?'ohne Stichtag':relDays(n)}</span></button>`;
-  }).join('') || '<div class="small">Du wartest gerade auf niemanden.</div>';
-  const od = ow.filter(isOverdue).length;
-  $('#waitHint').innerHTML = od ? `<div class="warn">${od} ${od===1?'Rückmeldung ist':'Rückmeldungen sind'} überfällig. Heute nachfassen.</div>` : (ow.length > 4 ? `<div class="small" style="margin-top:8px">und ${ow.length-4} weitere</div>` : '');
-
-  // Deadlines
-  const withDl = all.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));
-  $('#dlRows').innerHTML = withDl.slice(0,5).map(t=>{
-    const n = daysUntil(t.deadline);
-    return `<div class="dlrow ${dlClass(n)}"><span class="d">${fmtShort(t.deadline)}</span><span class="t" title="${esc(t.title)}">${esc(t.title||'Ohne Titel')}</span><span class="r">${relDays(n)}</span></div>`;
-  }).join('') || '<div class="small">Keine Deadlines gesetzt.</div>';
-  const belowCap = all.slice(fit).filter(t=>t.deadline && daysUntil(t.deadline) <= 7);
-  const overdue = withDl.filter(t=>daysUntil(t.deadline) < 0);
-  let dh = '';
-  if(overdue.length) dh = `<div class="warn">${overdue.length} ${overdue.length===1?'Aufgabe ist':'Aufgaben sind'} überfällig. Neu terminieren oder sofort erledigen.</div>`;
-  else if(belowCap.length) dh = `<div class="warn">„${esc(belowCap[0].title)}“ ist ${relDays(daysUntil(belowCap[0].deadline))} fällig, liegt aber unter der Kapazitätsgrenze.</div>`;
-  $('#dlHint').innerHTML = dh;
-
-  // Ampel
-  $('#urgRows').innerHTML = URG_ORDER.map(k=>{
-    const ts = all.filter(t=>t.urgency===k);
-    return `<div class="row" style="--c:${URG[k].color}"><span class="sw"></span><span>${URG[k].label}</span><span class="n">${ts.length} Stk.</span><span class="p">${sumPts(ts)} SP</span></div>`;
-  }).join('');
-  const reds = all.filter(t=>t.urgency==='red').length;
-  const firstNonRed = all.findIndex(t=>t.urgency!=='red');
-  const redBelow = firstNonRed>=0 && all.slice(firstNonRed).some(t=>t.urgency==='red');
-  let hint = '';
-  if(all.length && reds/all.length > 0.3) hint = `<div class="warn">${Math.round(reds/all.length*100)} % sind rot. Wenn alles dringend ist, ist nichts dringend. Maximal 2 bis 3 echte Rote.</div>`;
-  else if(redBelow) hint = `<div class="warn">Eine rote Aufgabe liegt unter einer nicht-roten. Bewusst so entschieden?</div>`;
-  else if(all.length) hint = `<div class="ok">Ampel und Reihenfolge passen zusammen.</div>`;
-  $('#urgHint').innerHTML = hint;
+  $('#capText').innerHTML = all.length
+    ? `Die <b>Top ${fit}</b> passen in deine Woche (<b>${cum}</b> von ${cap} SP).${unest ? ` <b>${unest}</b> noch ohne Schätzung.` : ''}`
+    : 'Noch keine offenen Aufgaben.';
 
   // Projekte
-  const maxP = Math.max(1, ...state.projects.map(p=>sumPts(all.filter(t=>t.project===p.id))));
   $('#projRows').innerHTML = state.projects.map(p=>{
-    const ts = all.filter(t=>t.project===p.id), sp = sumPts(ts);
-    return `<div class="row" style="--c:${esc(p.color)}"><span class="sw"></span><span>${esc(p.name)}<div class="bar" style="margin:5px 0 0;height:4px"><span style="width:${sp/maxP*100}%;background:${esc(p.color)}"></span></div></span><span class="n">${ts.length} Stk.</span><span class="p">${sp} SP</span></div>`;
+    const ts = all.filter(t=>t.project===p.id);
+    return `<div class="prow" style="--c:${esc(p.color)}"><span class="sw"></span><span class="nm">${esc(p.name)}</span><span class="n">${ts.length} offen</span><span class="p">${sumPts(ts)} SP</span></div>`;
   }).join('') || '<div class="small">Noch keine Projekte.</div>';
 }
 
@@ -1451,7 +1505,7 @@ async function completeTask(t, srcEl){
   const r = srcEl.getBoundingClientRect();
   const cx = r.left + r.width/2, cy = r.top + r.height/2;
 
-  $(`.strip[data-id="${t.id}"] .check`)?.classList.add('pop');
+  $(`.strip[data-id="${t.id}"] .check`)?.classList.add('pop-anim');
   burst(cx, cy, {count: isOne ? 110 : 80, angle:-90, spread:150, speed:[5,13]});
 
   if(isOne){
@@ -1581,8 +1635,12 @@ list.addEventListener('click', e=>{
   const t = taskOf(e.target); if(!t) return;
   if(hit('.wchip')){ openPanels.has(t.id) ? openPanels.delete(t.id) : openPanels.add(t.id); renderBoard(); return; }
   if(hit('.w-add')){ addWait({task:t}); return; }
-  if(hit('[data-u]')){ t.urgency = hit('[data-u]').dataset.u; save(); renderAll(); return; }
-  if(hit('[data-p]')){ const n = Number(hit('[data-p]').dataset.p); t.points = t.points===n ? null : n; save(); renderAll(); return; }
+  if(hit('[data-pop]')){
+    const anchor = hit('[data-pop]');
+    if(popCtx && popCtx.id===t.id && popCtx.kind===anchor.dataset.pop) closePop();
+    else openPop(anchor.dataset.pop, t, anchor);
+    return;
+  }
   if(hit('.marker') && !t.done){ t.urgency = URG_ORDER[(URG_ORDER.indexOf(t.urgency)+1) % URG_ORDER.length]; save(); renderAll(); return; }
   if(hit('.check')){ completeTask(t, hit('.check')); return; }
   if(hit('.restore')){ restoreTask(t); return; }
@@ -1619,6 +1677,7 @@ list.addEventListener('dragover', e=>{
   renumber();
 });
 list.addEventListener('drop', e=> e.preventDefault());
+list.addEventListener('scroll', ()=> closePop(), {passive:true});
 list.addEventListener('dragend', ()=>{
   if(!dragEl) return;
   dragEl.classList.remove('dragging'); dragEl.draggable = false;
@@ -1741,10 +1800,96 @@ $('#waitSeg').addEventListener('click', e=>{
   const b = e.target.closest('[data-wf]'); if(!b) return;
   waitFilter = b.dataset.wf; renderWaits();
 });
-document.querySelector('.side').addEventListener('click', e=>{
+$('#side').addEventListener('click', e=>{
   if(e.target.closest('[data-pm]')) return openPM();
-  if(e.target.closest('[data-goto="waits"]')){ view = 'waits'; filter = 'all'; waitFilter = 'open'; renderAll(); }
+  const it = e.target.closest('.attn-item'); if(!it) return;
+  closeSide();
+  const kind = it.dataset.kind, ref = it.dataset.ref;
+  if(kind==='wait'){ view = 'waits'; filter = 'all'; waitFilter = 'open'; renderAll(); flash(`[data-wait="${ref}"]`); }
+  else { view = 'tasks'; filter = 'all'; renderAll(); if(ref) flash(`.strip[data-id="${ref}"]`); }
 });
+function flash(sel){
+  const el = $(sel); if(!el) return;
+  el.scrollIntoView({block:'center', behavior:'smooth'});
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+
+/* ---------- Popover für Ampel und Aufwand ---------- */
+const pop = $('#pop');
+let popCtx = null;
+function openPop(kind, t, anchor){
+  closePop();
+  popCtx = {kind, id:t.id, anchor};
+  if(kind==='urg'){
+    pop.innerHTML = `<div class="pop-title">Ampel · Dringlichkeit</div><div class="pop-urg">${
+      URG_ORDER.map(k=>`<button type="button" data-set="${k}" class="${t.urgency===k?'on':''}" style="--c:${URG[k].color}"><span class="dot"></span>${URG[k].label}<small>${URG[k].hint}</small></button>`).join('')
+    }</div>`;
+  }else{
+    pop.innerHTML = `<div class="pop-title">Aufwand in Story Points</div><div class="pop-pts">${
+      FIB.map(n=>`<button type="button" data-set="${n}" class="${t.points===n?'on':''}">${n}</button>`).join('')
+    }</div><div class="pop-foot"><span>Je größer, desto unsicherer</span>${t.points!=null ? '<button type="button" data-set="">Entfernen</button>' : ''}</div>`;
+  }
+  pop.hidden = false;
+  anchor.setAttribute('aria-expanded','true');
+  const r = anchor.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  const left = Math.min(Math.max(8, r.left + r.width/2 - pw/2), innerWidth - pw - 8);
+  let top = r.bottom + 6; if(top + ph > innerHeight - 8) top = r.top - ph - 6;
+  pop.style.left = left + 'px'; pop.style.top = top + 'px';
+  (pop.querySelector('button.on') || pop.querySelector('button'))?.focus();
+}
+function closePop(){
+  if(pop.hidden) return;
+  pop.hidden = true;
+  popCtx?.anchor?.setAttribute('aria-expanded','false');
+  popCtx = null;
+}
+pop.addEventListener('click', e=>{
+  const b = e.target.closest('[data-set]'); if(!b || !popCtx) return;
+  const t = taskById(popCtx.id), kind = popCtx.kind;
+  if(kind==='urg') t.urgency = b.dataset.set;
+  else t.points = b.dataset.set==='' ? null : Number(b.dataset.set);
+  closePop(); save(); renderAll();
+  $(`.strip[data-id="${t.id}"] [data-pop="${kind}"]`)?.focus();
+});
+pop.addEventListener('keydown', e=>{
+  const btns = [...pop.querySelectorAll('[data-set]')], i = btns.indexOf(document.activeElement);
+  if(['ArrowDown','ArrowRight'].includes(e.key)){ e.preventDefault(); btns[(i+1) % btns.length]?.focus(); }
+  if(['ArrowUp','ArrowLeft'].includes(e.key)){ e.preventDefault(); btns[(i-1+btns.length) % btns.length]?.focus(); }
+  if(popCtx?.kind==='pts' && ['1','2','3','5','8'].includes(e.key)){ e.preventDefault(); pop.querySelector(`[data-set="${e.key}"]`)?.click(); }
+  if(e.key==='Escape'){ const a = popCtx?.anchor; closePop(); a?.focus(); }
+});
+document.addEventListener('mousedown', e=>{
+  if(!pop.hidden && !pop.contains(e.target) && !e.target.closest('[data-pop]')) closePop();
+  if(document.body.classList.contains('side-open') && !e.target.closest('#side, #sideBtn, .pop, dialog')) closeSide();
+});
+addEventListener('resize', closePop);
+
+/* ---------- Seitenleiste als Schublade (Laptop) ---------- */
+function closeSide(){ document.body.classList.remove('side-open'); $('#sideBtn').setAttribute('aria-expanded','false'); }
+$('#sideBtn').addEventListener('click', ()=>{
+  const open = document.body.classList.toggle('side-open');
+  $('#sideBtn').setAttribute('aria-expanded', String(open));
+});
+
+/* ---------- Dichte ---------- */
+const DENS_KEY = 'priorisierer3000.density';
+function applyDensity(compact){
+  document.body.classList.toggle('compact', compact);
+  const b = $('#densBtn');
+  b.classList.toggle('on', compact); b.setAttribute('aria-pressed', String(compact));
+  b.title = compact ? 'Komfortable Ansicht' : 'Kompakte Ansicht';
+}
+try{ applyDensity(localStorage.getItem(DENS_KEY)==='compact'); }catch(e){ applyDensity(false); }
+$('#densBtn').addEventListener('click', ()=>{
+  const c = !document.body.classList.contains('compact');
+  applyDensity(c); try{ localStorage.setItem(DENS_KEY, c ? 'compact' : 'comfortable'); }catch(e){}
+});
+
+/* ---------- Hilfe ---------- */
+const helpDlg = $('#helpDlg');
+$('#helpBtn').addEventListener('click', ()=> helpDlg.showModal());
+helpDlg.addEventListener('click', e=>{ if(e.target.closest('[data-close]') || e.target===helpDlg) helpDlg.close(); });
+
 $('#capInput').addEventListener('change', e=>{
   state.settings.capacity = Math.max(1, Math.round(Number(e.target.value)||20)); save(); renderAll();
 });
@@ -1787,8 +1932,10 @@ $('#status').addEventListener('click', e=>{
 });
 
 document.addEventListener('keydown', e=>{
-  if(dlg.open || welcome.open || bakDlg.open) return;
+  if(e.key==='Escape'){ closePop(); closeSide(); }
+  if(dlg.open || welcome.open || bakDlg.open || helpDlg.open) return;
   const typing = e.target.matches('input, select, textarea, [contenteditable]');
+  if(!typing && e.key==='?'){ e.preventDefault(); helpDlg.showModal(); return; }
   if(!typing && (e.key==='n' || e.key==='N') && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); addTask(); }
   if(!typing && (e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='z' && lastUndo){ e.preventDefault(); lastUndo(); }
 });

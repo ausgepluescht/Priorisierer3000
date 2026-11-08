@@ -19,13 +19,16 @@ Aufgaben priorisieren wie Fluglotsen ihre Flugstreifen: Was oben liegt, ist dran
 |---|---|
 | Reihenfolge ändern | Streifen am Griff ⋮⋮ oder an der Prio-Nummer ziehen, alternativ `Alt + ↑/↓` |
 | Neue Aufgabe | `＋ Aufgabe` oder Taste `N`. Neue Aufgaben starten unten. |
-| Ampel | Punkte in der Spalte Ampel, oder Klick auf den Farbbalken links |
-| Aufwand | Story Points 1, 2, 3, 5, 8, 13, 21. Nochmal klicken entfernt die Schätzung. |
+| Ampel | Klick auf den Wert in der Spalte Ampel, dann auswählen. Oder Klick auf den Farbbalken links. |
+| Aufwand | Klick auf den Wert in der Spalte Aufwand, dann 1, 2, 3, 5, 8, 13 oder 21 wählen (auch per Tastatur) |
 | Deadline | Klick in die Spalte Deadline |
 | Erledigt | Grüner Haken im Streifen oder „Erledigt“ in der One-Thing-Kachel |
 | Warten auf | Chip unter dem Titel aufklappen, oder Ansicht „Warte auf“ oben rechts |
 | Projekte | Tab „Projekte“: anlegen, umbenennen, Farbe, Reihenfolge, löschen |
 | Rückgängig | „Rückgängig“ in der Meldung unten oder `Strg + Z` |
+| Kompakte Ansicht | Symbol ☰ oben rechts, merkt sich die Einstellung |
+| Hinweise | Karte „Heute klären“ rechts. Auf Laptops über den Knopf „Hinweise“ oben. |
+| Hilfe | `?` oben rechts oder Taste `?` |
 
 ## Datensicherheit
 
