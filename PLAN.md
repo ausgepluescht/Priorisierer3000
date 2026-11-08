@@ -17,6 +17,9 @@ Optimiert für einen 16:9-Bildschirm, scrollbar, mit Projekten als Kategorien.
 | Notiz | freier Text | nächster Schritt, Kontext, Blocker |
 | Ampel | 4 Punkte | Dringend · Bald · Kann warten · Wartet |
 | Story Points | 1 2 3 5 8 13 21 | Aufwand nach Fibonacci, wie in Scrum |
+| Deadline | Datum + „in 3 Tagen“ | färbt sich orange (≤ 2 Tage) und rot (überfällig) |
+| ✓ Haken | Erledigt | Konfetti, Streifen gleitet ins Archiv |
+| × | Löschen | ganz rechts, erscheint beim Darüberfahren |
 
 ## 3. Farbsystem (aus deinen zwei Paletten)
 
@@ -31,14 +34,16 @@ Optimiert für einen 16:9-Bildschirm, scrollbar, mit Projekten als Kategorien.
 
 **Projekte** bekommen die kühleren Töne (`#31497e`, `#a14e9a`, `#006960`, `#d44c8d`, `#04565c` …), damit sie nicht mit der Ampel konkurrieren.
 **Rahmen**: Kopfzeile in Navy `#003f5c`, Hauptbutton in Amber `#ffa600`.
-**Schrift**: Inter (Fallback Segoe UI), Zahlen in JetBrains Mono, damit die Prio-Nummern wie auf einem Streifen wirken.
+**Schrift**: Inter (Fallback Segoe UI) für alles, auch für Zahlen (gleich breite Ziffern). Nur „The One Thing“ steht als Zitat in Lora kursiv.
 
 ## 4. JSON dauerhaft verknüpfen (Technik)
 
-- Über die **File System Access API** (Chrome und Edge) wird die Datei ausgewählt.
+- Zielbrowser ist **Microsoft Edge**. Die HTML-Datei lokal in Edge öffnen, nicht in einer Vorschau (dort ist der Dateizugriff gesperrt).
+- Über die **File System Access API** (Edge und Chrome) wird die Datei ausgewählt.
 - Der Datei-Zugriff wird in der **IndexedDB** des Browsers gemerkt. Beim nächsten Start wird die Datei automatisch geladen.
 - Jede Änderung wird nach 0,4 Sekunden automatisch in die Datei geschrieben.
-- Je nach Browser-Einstellung fragt Chrome beim Neustart einmal nach der Erlaubnis. Dann reicht **ein Klick** auf den gelben Status oben rechts. Wenn Chrome „Bei jedem Besuch erlauben“ anbietet, entfällt auch dieser Klick.
+- Falls die IT den Dateizugriff per Richtlinie sperrt, bleiben Export und Import als Weg.
+- Je nach Browser-Einstellung fragt Edge beim Neustart einmal nach der Erlaubnis. Dann reicht **ein Klick** auf den gelben Status oben rechts. Wenn der Browser „Bei jedem Besuch erlauben“ anbietet, entfällt auch dieser Klick.
 - Zusätzlich liegt immer eine Kopie im Browser (localStorage). Für Firefox gibt es Export und Import als Fallback.
 - Tipp: Die JSON kann in einem OneDrive- oder Teams-Ordner liegen. Dann ist sie automatisch gesichert.
 
@@ -52,7 +57,8 @@ Optimiert für einen 16:9-Bildschirm, scrollbar, mit Projekten als Kategorien.
   "projects": [ { "id": "p1", "name": "Tagesgeschäft", "color": "#31497e" } ],
   "tasks": [
     { "id": "a1b2c3", "title": "Budgetplanung abgeben", "note": "Zahlen fehlen noch",
-      "project": "p1", "urgency": "red", "points": 8 }
+      "project": "p1", "urgency": "red", "points": 8,
+      "deadline": "2026-11-11", "done": false, "doneAt": null, "wasOneThing": false }
   ],
   "updated": "2026-11-08T10:00:00.000Z"
 }
@@ -70,18 +76,27 @@ Die Reihenfolge im Array `tasks` ist die Priorität.
 - **Lagebild** rechts: „Jetzt dran“, Kapazität, Ampel-Lage mit Warnungen, Projektverteilung
 - JSON verknüpfen, neu anlegen, lösen, exportieren, importieren
 
+### Neu in v0.2
+
+- **The One Thing**: Die oberste Aufgabe steht groß als Zitat über der Liste, mit eigenem Erledigt-Knopf
+- Zähler „heute erledigt“ und **One-Thing-Serie** (wie viele Tage am Stück die One Thing erledigt wurde)
+- **Deadline** je Streifen, Karte „Nächste Deadlines“ mit Warnung, wenn etwas bald fällig ist, aber unter der Kapazitätsgrenze liegt
+- **Erledigt-Haken** mit Konfetti; bei der One Thing große Feier. Archiv-Tab „✓ Erledigt“ mit Wiederherstellen
+- Design-Review: ein gemeinsames Raster für Kopfzeile und Streifen, alle Knöpfe gleich groß und gleichmäßig verteilt, Zahlen in Inter
+
 ## 6. Iterationsplan
 
-1. **Mockup bewerten** (jetzt): Farben, Dichte, Spalten, Schrift. Was fehlt, was stört?
-2. **Projekte verwalten**: Farbe wählen, löschen, archivieren, Reihenfolge der Tabs
-3. **Erledigt-Ablage**: Streifen abhaken, wandern in ein Archiv mit Datum
-4. **Fälligkeitsdatum** und optional „Wartet auf wen?“
-5. **Priorisierungshilfen**
+1. ~~Mockup bewerten~~ ✓
+2. ~~Erledigt-Ablage, Deadline, One Thing~~ ✓ (v0.2)
+3. **Projekte verwalten**: Farbe wählen, löschen, archivieren, Reihenfolge der Tabs
+4. **Fokusblock für die One Thing**: Zeitfenster und Timer direkt im Banner
+5. **„Wartet auf …“**: Person und Nachfass-Datum für lila Streifen
+6. **Priorisierungshilfen**
    - Zweite Achse **Wert / Impact** (ebenfalls Fibonacci)
    - Vorschlag nach **WSJF** (Wert + Dringlichkeit geteilt durch Aufwand) als Knopf „Vorschlag anzeigen“, du entscheidest final per Drag & Drop
    - Optional eine Eisenhower-Ansicht als zweite Darstellung
-6. **WIP-Limit**: maximal 3 Streifen gleichzeitig „in Arbeit“
-7. Feinschliff: Dunkelmodus, Druckansicht für das Wochen-Meeting, Suche
+7. **WIP-Limit**: maximal 3 Streifen gleichzeitig „in Arbeit“
+8. Feinschliff: Dunkelmodus, Druckansicht für das Wochen-Meeting, Suche
 
 ## 7. Empfehlungen aus Sicht Priorisierung
 
