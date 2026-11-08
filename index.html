@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Priorisierer 3000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   Farbsystem – aus den beiden gewählten Paletten
+   ========================================================= */
+:root{
+  /* Palette 1 */
+  --navy:#003f5c; --indigo:#31497e; --violet:#674f95; --plum:#a14e9a;
+  --magenta:#d44c8d; --red:#f9596f; --orange:#ff7a47; --amber:#ffa600;
+  /* Palette 2 */
+  --petrol:#04565c; --teal:#006960; --emerald:#007b5a; --green:#238b4a;
+  --leaf:#569933; --olive:#8aa40e; --mustard:#c2a900;
+
+  /* Ampel (Dringlichkeit) */
+  --u-red:var(--red); --u-yellow:var(--amber); --u-green:var(--green); --u-wait:var(--violet);
+
+  /* Oberflächen */
+  --bg:#eef2f5; --surface:#ffffff; --surface-2:#f7f9fb;
+  --ink:#16252f; --muted:#5d6d79; --line:#d8e0e6; --line-strong:#c3cfd8;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(0,40,60,.06), 0 2px 8px rgba(0,40,60,.05);
+  --shadow-lift:0 10px 28px rgba(0,40,60,.22);
+
+  --font: "Inter","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --mono: "JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+
+  /* Spalten eines Streifens */
+  --cols: 26px 10px 64px minmax(220px,26%) minmax(160px,1fr) 136px 292px 36px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font); font-size:14px; line-height:1.4;
+  display:flex; flex-direction:column; overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+
+/* ---------- Kopfzeile ---------- */
+.topbar{
+  height:58px; flex:none; display:flex; align-items:center; gap:16px;
+  padding:0 24px; background:var(--navy); color:#fff;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.2px}
+.brand small{font-weight:500;color:#9fc1d3;font-size:12px;margin-left:4px}
+.spacer{flex:1}
+.status{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+  border-radius:999px; padding:6px 12px 6px 10px; font-size:12.5px; color:#dbe9f1;
+  max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.status .led{width:9px;height:9px;border-radius:50%;background:#8aa0ad;flex:none}
+.status[data-s="linked"] .led{background:#4fd18a; box-shadow:0 0 0 3px rgba(79,209,138,.2)}
+.status[data-s="saving"] .led{background:var(--amber)}
+.status[data-s="needs-permission"] .led,
+.status[data-s="none"] .led{background:var(--amber)}
+.status[data-s="error"] .led{background:var(--red)}
+button.status{cursor:pointer}
+button.status:hover{background:rgba(255,255,255,.16)}
+
+.btn{
+  display:inline-flex;align-items:center;gap:6px; border-radius:8px;
+  padding:8px 14px; font-weight:600; font-size:13px; border:1px solid transparent;
+}
+.btn-primary{background:var(--amber); color:var(--navy)}
+.btn-primary:hover{filter:brightness(1.06)}
+.btn-ghost{background:transparent; color:#fff; border-color:rgba(255,255,255,.25)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+
+.menu-wrap{position:relative}
+.menu{
+  position:absolute; right:0; top:calc(100% + 8px); z-index:50; min-width:270px;
+  background:#fff; color:var(--ink); border-radius:10px; box-shadow:var(--shadow-lift);
+  padding:6px; display:none;
+}
+.menu.open{display:block}
+.menu button{
+  display:flex; width:100%; text-align:left; gap:10px; align-items:flex-start;
+  background:none; border:0; padding:9px 10px; border-radius:7px;
+}
+.menu button:hover{background:var(--surface-2)}
+.menu button span{display:block}
+.menu .sub{font-size:12px;color:var(--muted)}
+.menu hr{border:0;border-top:1px solid var(--line);margin:4px 6px}
+.menu button[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---------- Projekt-Tabs ---------- */
+.tabs{
+  flex:none; display:flex; align-items:center; gap:8px; padding:10px 24px;
+  background:var(--surface); border-bottom:1px solid var(--line); overflow-x:auto;
+}
+.tab{
+  display:inline-flex;align-items:center;gap:8px; white-space:nowrap;
+  border:1px solid var(--line); background:var(--surface); border-radius:999px;
+  padding:6px 12px; font-weight:500;
+}
+.tab:hover{border-color:var(--line-strong); background:var(--surface-2)}
+.tab .dot{width:10px;height:10px;border-radius:3px;background:var(--c,#8aa0ad)}
+.tab .count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tab.active{background:var(--navy); border-color:var(--navy); color:#fff}
+.tab.active .count{color:#a9c6d5}
+.tab.active .dot{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.tab.add{border-style:dashed;color:var(--muted)}
+
+/* ---------- Hauptbereich ---------- */
+.main{flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 310px; gap:20px; padding:16px 24px 20px}
+.board{min-height:0; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow)}
+.colhead{
+  display:grid; grid-template-columns:var(--cols); align-items:center;
+  padding:0 14px; height:36px; flex:none;
+  font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid var(--line);
+}
+.colhead > div{padding:0 12px}
+.colhead > div:nth-child(3){text-align:center;padding:0}
+.list{flex:1; min-height:0; overflow-y:auto; padding:12px 14px 24px; display:flex; flex-direction:column; gap:8px; scroll-behavior:smooth}
+
+/* ---------- Flugstreifen ---------- */
+.strip{
+  --urg:var(--u-green);
+  display:grid; grid-template-columns:var(--cols); align-items:stretch;
+  min-height:66px; background:var(--surface);
+  border:1px solid var(--line); border-radius:8px; box-shadow:var(--shadow);
+  transition:box-shadow .15s, transform .15s, opacity .15s;
+  position:relative; flex:none;
+}
+.strip:hover{border-color:var(--line-strong)}
+.strip:focus-within{border-color:#9db3c2}
+.strip.dragging{opacity:.55; box-shadow:var(--shadow-lift); transform:scale(1.005); border-style:dashed}
+.strip.over-cap{opacity:.72}
+.strip.over-cap:hover,.strip.over-cap:focus-within{opacity:1}
+
+.handle{
+  display:flex;align-items:center;justify-content:center; cursor:grab;
+  color:#a3b2bd; font-size:13px; letter-spacing:-2px; user-select:none;
+  border-radius:8px 0 0 8px;
+}
+.handle:hover{color:var(--navy); background:var(--surface-2)}
+.handle:active{cursor:grabbing}
+.handle:focus-visible{outline:2px solid var(--navy); outline-offset:-2px}
+.marker{background:var(--urg); cursor:pointer}
+.marker:hover{filter:brightness(1.08)}
+.rank{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--mono); font-weight:700; font-size:20px; color:var(--navy);
+  background:color-mix(in srgb, var(--urg) 10%, #fff);
+  border-right:1px solid var(--line); cursor:grab; user-select:none;
+}
+.rank small{font-family:var(--font);font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);margin-top:1px}
+.strip.top .rank{background:color-mix(in srgb, var(--urg) 22%, #fff)}
+.strip.top{border-color:color-mix(in srgb, var(--urg) 55%, var(--line)); box-shadow:0 0 0 1px color-mix(in srgb, var(--urg) 35%, transparent), var(--shadow)}
+.strip.top .rank small{color:var(--navy)}
+
+.cell{padding:9px 12px; border-right:1px solid var(--line); min-width:0; display:flex; flex-direction:column; justify-content:center}
+.title{font-weight:600; font-size:15px; outline:none; border-radius:4px; overflow-wrap:anywhere}
+.note{color:var(--muted); outline:none; font-size:13.5px; overflow-wrap:anywhere;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+.note:focus{display:block; color:var(--ink)}
+[contenteditable]:empty::before{content:attr(data-ph); color:#a8b5bf; font-weight:400}
+[contenteditable]:focus{background:#f3f7fa; box-shadow:0 0 0 3px #f3f7fa}
+.cell.note-cell{justify-content:center}
+
+.proj{display:flex;align-items:center;gap:6px;margin-top:4px}
+.proj .pdot{width:8px;height:8px;border-radius:2px;background:var(--pc,#8aa0ad);flex:none}
+.proj select{
+  border:0; background:transparent; font-size:12px; color:var(--muted); padding:0; cursor:pointer;
+  max-width:100%; text-overflow:ellipsis;
+}
+.proj select:hover{color:var(--ink)}
+
+/* Ampel */
+.urg{flex-direction:row; align-items:center; justify-content:center; gap:7px}
+.urg button{
+  width:22px;height:22px;border-radius:50%; border:2px solid transparent;
+  background:color-mix(in srgb, var(--c) 28%, #fff); padding:0;
+  transition:transform .1s;
+}
+.urg button:hover{transform:scale(1.12); background:color-mix(in srgb, var(--c) 60%, #fff)}
+.urg button.on{background:var(--c); border-color:#fff; box-shadow:0 0 0 2px var(--c)}
+.urg .lbl{display:none}
+
+/* Fibonacci-Punkte */
+.pts{flex-direction:row; align-items:center; justify-content:center; gap:4px}
+.pts button{
+  width:34px; height:30px; border-radius:6px; border:1px solid var(--line);
+  background:var(--surface); font-family:var(--mono); font-weight:500; font-size:13px; color:var(--muted);
+  padding:0; font-variant-numeric:tabular-nums;
+}
+.pts button:hover{border-color:var(--pc); color:var(--ink); background:color-mix(in srgb, var(--pc) 12%, #fff)}
+.pts button.on{background:var(--pc); border-color:var(--pc); color:var(--pt,#fff); font-weight:700}
+
+.act{display:flex;align-items:center;justify-content:center}
+.del{
+  width:26px;height:26px;border-radius:6px;border:0;background:none;color:#b3c0c9;font-size:17px;line-height:1;
+  opacity:0; transition:opacity .15s;
+}
+.strip:hover .del,.del:focus-visible{opacity:1}
+.del:hover{background:#fde8eb;color:var(--red)}
+
+/* Kapazitätsgrenze */
+.capline{
+  display:flex;align-items:center;gap:10px; margin:6px 0 2px; color:var(--orange);
+  font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+}
+.capline::before,.capline::after{content:""; flex:1; border-top:2px dashed color-mix(in srgb, var(--orange) 60%, transparent)}
+.list.dnd .capline{visibility:hidden}
+
+.empty{margin:auto; text-align:center; color:var(--muted); padding:40px}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:6px}
+
+/* ---------- Seitenleiste ---------- */
+.side{min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:14px; padding-right:2px}
+.card{flex:none; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow)}
+.card h3{margin:0 0 10px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600}
+.focus{background:var(--navy); color:#fff; border-color:var(--navy); position:relative; overflow:hidden}
+.focus h3{color:#9fc1d3}
+.focus::before{content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--fc,var(--amber))}
+.focus .ft{font-size:17px; font-weight:700; line-height:1.3}
+.focus .fm{margin-top:8px; font-size:12.5px; color:#b7d0dc; display:flex; gap:10px; flex-wrap:wrap}
+.focus .fm b{color:#fff;font-weight:600}
+
+.cap-in{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.cap-in input{width:64px; padding:5px 8px; border:1px solid var(--line); border-radius:6px; font-weight:600; color:var(--ink); text-align:right}
+.bar{height:8px; background:#e6ecf0; border-radius:99px; overflow:hidden; margin:12px 0 8px; display:flex}
+.bar span{height:100%}
+.small{font-size:12.5px;color:var(--muted)}
+.small b{color:var(--ink)}
+
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:grid; grid-template-columns:12px 1fr auto auto; gap:8px; align-items:center; font-size:13px}
+.row .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.row .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;min-width:44px;text-align:right}
+.row .p{font-family:var(--mono);font-size:12px;font-weight:700;min-width:44px;text-align:right}
+.warn{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:12.5px; background:#fff1f3; color:#a3283b; border:1px solid #ffd0d7}
+.ok{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:12.5px; background:#eef8f1; color:#1b6b3a; border:1px solid #cbe9d5}
+
+.keys{font-size:12.5px;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}
+kbd{font-family:var(--mono);font-size:11px;background:var(--surface-2);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--ink);white-space:nowrap}
+
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+  background:var(--navy); color:#fff; padding:10px 16px; border-radius:8px; box-shadow:var(--shadow-lift);
+  opacity:0; transition:.2s; pointer-events:none; font-size:13px; z-index:100;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+/* Kleinere Bildschirme: Seitenleiste ausblenden */
+@media (max-width:1350px){
+  .main{grid-template-columns:1fr}
+  .side{display:none}
+}
+@media (max-width:1100px){
+  :root{--cols: 26px 10px 54px minmax(180px,1fr) 0 120px 260px 32px}
+  .note-cell,.colhead > div:nth-child(5){display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+      <rect x="2" y="3"  width="22" height="5" rx="1.5" fill="#f9596f"/>
+      <rect x="2" y="10.5" width="22" height="5" rx="1.5" fill="#ffa600"/>
+      <rect x="2" y="18" width="22" height="5" rx="1.5" fill="#238b4a"/>
+    </svg>
+    Priorisierer 3000 <small>Mockup v0.1</small>
+  </div>
+  <div class="spacer"></div>
+  <button class="status" id="status" data-s="none" type="button"><span class="led"></span><span id="statusText">Nicht verknüpft</span></button>
+  <div class="menu-wrap">
+    <button class="btn btn-ghost" id="fileBtn" type="button">Datei ▾</button>
+    <div class="menu" id="fileMenu" role="menu">
+      <button data-act="open" type="button"><span>📂</span><span>JSON-Datei verknüpfen<span class="sub">Bestehende Datei öffnen &amp; dauerhaft merken</span></span></button>
+      <button data-act="create" type="button"><span>✨</span><span>Neue JSON-Datei anlegen<span class="sub">Aktuelle Daten in neue Datei speichern</span></span></button>
+      <button data-act="unlink" type="button"><span>⛓️</span><span>Verknüpfung lösen</span></button>
+      <hr>
+      <button data-act="export" type="button"><span>⬇️</span><span>Als JSON herunterladen<span class="sub">Backup / Fallback ohne Dateizugriff</span></span></button>
+      <button data-act="import" type="button"><span>⬆️</span><span>JSON importieren (einmalig)</span></button>
+      <hr>
+      <button data-act="demo" type="button"><span>🧪</span><span>Demo-Daten laden</span></button>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="addBtn" type="button">＋ Aufgabe</button>
+  <input type="file" id="importInput" accept=".json,application/json" hidden>
+</header>
+
+<nav class="tabs" id="tabs" aria-label="Projekte"></nav>
+
+<main class="main">
+  <section class="board" aria-label="Prioritätenliste">
+    <div class="colhead">
+      <div></div><div></div><div>Prio</div><div>Aufgabe</div><div>Notiz / nächster Schritt</div><div style="text-align:center">Ampel</div><div style="text-align:center">Aufwand (Story Points)</div><div></div>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <aside class="side">
+    <section class="card focus" id="focusCard">
+      <h3>Jetzt dran · Prio 1</h3>
+      <div class="ft" id="focusTitle">–</div>
+      <div class="fm" id="focusMeta"></div>
+    </section>
+
+    <section class="card">
+      <h3>Kapazität</h3>
+      <label class="cap-in"><input type="number" id="capInput" min="1" step="1"> Story Points pro Woche</label>
+      <div class="bar" id="capBar"></div>
+      <div class="small" id="capText"></div>
+    </section>
+
+    <section class="card">
+      <h3>Ampel-Lage</h3>
+      <div class="rows" id="urgRows"></div>
+      <div id="urgHint"></div>
+    </section>
+
+    <section class="card">
+      <h3>Projekte</h3>
+      <div class="rows" id="projRows"></div>
+    </section>
+
+    <section class="card">
+      <h3>Bedienung</h3>
+      <div class="keys">
+        <span>⋮⋮ ziehen</span><span>Streifen nach oben/unten sortieren</span>
+        <span><kbd>Alt</kbd>+<kbd>↑</kbd><kbd>↓</kbd></span><span>Streifen verschieben</span>
+        <span><kbd>N</kbd></span><span>Neue Aufgabe</span>
+        <span>Farbbalken</span><span>Klick = Ampel weiterschalten</span>
+        <span>Doppelklick Tab</span><span>Projekt umbenennen</span>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   Konstanten
+   ========================================================= */
+const FIB = [1,2,3,5,8,13,21];
+const URG = {
+  red:    {label:'Dringend',    color:'#f9596f'},
+  yellow: {label:'Bald',        color:'#ffa600'},
+  green:  {label:'Kann warten', color:'#238b4a'},
+  wait:   {label:'Wartet / blockiert', color:'#674f95'},
+};
+const URG_ORDER = ['red','yellow','green','wait'];
+/* Aufwand: grün (klein) → rot (groß) – Palette 2 → Palette 1 */
+const PT_COLOR = {1:'#238b4a',2:'#569933',3:'#8aa40e',5:'#c2a900',8:'#ffa600',13:'#ff7a47',21:'#f9596f'};
+const PT_TEXT  = {1:'#fff',2:'#fff',3:'#16252f',5:'#16252f',8:'#16252f',13:'#16252f',21:'#fff'};
+const PROJECT_COLORS = ['#31497e','#a14e9a','#006960','#d44c8d','#04565c','#8aa40e','#674f95','#007b5a'];
+const LS_KEY = 'priorisierer3000.cache';
+
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2,9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =========================================================
+   Demo-Daten
+   ========================================================= */
+function demoData(){
+  const P = [
+    {id:'p1', name:'Tagesgeschäft',    color:'#31497e'},
+    {id:'p2', name:'Digitalisierung',  color:'#a14e9a'},
+    {id:'p3', name:'Team & Führung',   color:'#006960'},
+    {id:'p4', name:'Controlling',      color:'#d44c8d'},
+  ];
+  const T = [
+    ['Budgetplanung 2027 abgeben','Zahlen aus Controlling fehlen noch, Deadline Freitag','p4','red',8],
+    ['Lieferantengespräch vorbereiten','Agenda und Reklamationsliste zusammenstellen','p1','red',3],
+    ['Mitarbeitergespräche terminieren','6 Gespräche bis Monatsende, Slots im Kalender blocken','p3','yellow',2],
+    ['Freigabe IT-Ticket Handscanner','Wartet auf Rückmeldung der IT, Dienstag nachhaken','p2','wait',1],
+    ['KPI-Dashboard Entwurf','Datenquelle klären, ersten Entwurf mit dem Team abstimmen','p2','yellow',5],
+    ['Inventur vorbereiten','Zähllisten und Teameinteilung','p1','yellow',8],
+    ['Prozessdoku Wareneingang','Ist-Prozess aufnehmen, Flussdiagramm erstellen','p2','yellow',13],
+    ['Onboarding-Plan neue Kollegin','Patenschaft festlegen, erste Woche durchplanen','p3','green',5],
+    ['Postfach aufräumen','Timebox 30 Minuten, Inbox Zero','p1','green',2],
+    ['Workshop Teamziele 2027','Format überlegen, noch nicht geschätzt','p3','green',null],
+  ];
+  return {
+    app:'Priorisierer3000', version:1,
+    settings:{capacity:20},
+    projects:P,
+    tasks:T.map(([title,note,project,urgency,points])=>({id:uid(),title,note,project,urgency,points})),
+    updated:new Date().toISOString(),
+  };
+}
+
+function normalize(d){
+  d = d && typeof d==='object' ? d : {};
+  const projects = Array.isArray(d.projects) ? d.projects.map((p,i)=>({
+    id:String(p.id ?? uid()), name:String(p.name ?? 'Projekt'), color:p.color || PROJECT_COLORS[i % PROJECT_COLORS.length]
+  })) : [];
+  const tasks = Array.isArray(d.tasks) ? d.tasks.map(t=>({
+    id:String(t.id ?? uid()), title:String(t.title ?? ''), note:String(t.note ?? ''),
+    project: t.project ?? (projects[0]?.id ?? null),
+    urgency: URG[t.urgency] ? t.urgency : 'green',
+    points: FIB.includes(Number(t.points)) ? Number(t.points) : null,
+  })) : [];
+  return {
+    app:'Priorisierer3000', version:1,
+    settings:{capacity: Number(d.settings?.capacity) > 0 ? Number(d.settings.capacity) : 20},
+    projects, tasks, updated:d.updated || new Date().toISOString(),
+  };
+}
+
+/* =========================================================
+   Zustand
+   ========================================================= */
+let state = null;
+let filter = 'all';
+
+/* =========================================================
+   Speicher: IndexedDB merkt sich den Datei-Handle dauerhaft
+   ========================================================= */
+const FS_OK = 'showOpenFilePicker' in window;
+let fileHandle = null;
+let fileStatus = 'none';
+let saveTimer = null;
+
+function idb(){
+  return new Promise((res,rej)=>{
+    const r = indexedDB.open('priorisierer3000',1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbOp(mode, fn){
+  const db = await idb();
+  return new Promise((res,rej)=>{
+    const tx = db.transaction('kv', mode);
+    const req = fn(tx.objectStore('kv'));
+    tx.oncomplete = () => res(req?.result);
+    tx.onerror = () => rej(tx.error);
+  });
+}
+const idbGet = k => idbOp('readonly', s => s.get(k));
+const idbSet = (k,v) => idbOp('readwrite', s => s.put(v,k));
+const idbDel = k => idbOp('readwrite', s => s.delete(k));
+
+function cacheLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function readCache(){ try{ const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
+
+function setStatus(s, extra){
+  fileStatus = s;
+  const el = $('#status'), txt = $('#statusText');
+  el.dataset.s = s;
+  const name = fileHandle?.name ? `„${fileHandle.name}“` : '';
+  const time = new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  txt.textContent = {
+    'linked':           `${name} · gespeichert ${time}`,
+    'saving':           `${name} · speichere …`,
+    'needs-permission': `${name} wieder verbinden (1 Klick)`,
+    'none':             'Keine JSON verknüpft · nur Browser-Speicher',
+    'unsupported':      'Browser ohne Dateizugriff · Export nutzen',
+    'readonly':         `${name} · nur lesen`,
+    'error':            `Fehler beim Speichern ${extra||''}`,
+  }[s] || s;
+  el.title = s === 'linked' ? 'Änderungen werden automatisch in die verknüpfte Datei geschrieben.' : '';
+}
+
+async function loadFromFile(){
+  const file = await fileHandle.getFile();
+  const text = await file.text();
+  if(!text.trim()){ await writeFile(); return; }         // leere Datei → aktuelle Daten hineinschreiben
+  const fromFile = normalize(JSON.parse(text));
+  const cache = readCache();
+  if(cache && cache.updated && fromFile.updated && cache.updated > fromFile.updated
+     && JSON.stringify(normalize(cache).tasks) !== JSON.stringify(fromFile.tasks)){
+    if(confirm('Im Browser liegen neuere Änderungen als in der Datei.\n\nOK = Browser-Stand in die Datei übernehmen\nAbbrechen = Datei-Stand laden')){
+      await writeFile(); return;
+    }
+  }
+  state = fromFile; cacheLocal(); renderAll();
+}
+async function writeFile(){
+  const w = await fileHandle.createWritable();
+  await w.write(JSON.stringify(state, null, 2));
+  await w.close();
+}
+
+function save(){
+  state.updated = new Date().toISOString();
+  cacheLocal();
+  if(fileHandle && (fileStatus==='linked' || fileStatus==='saving' || fileStatus==='error')){
+    setStatus('saving');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async ()=>{
+      try{ await writeFile(); setStatus('linked'); }
+      catch(e){ console.error(e); setStatus('error'); }
+    }, 400);
+  }
+}
+
+async function openFile(){
+  try{
+    const [h] = await showOpenFilePicker({types:[{description:'JSON',accept:{'application/json':['.json']}}]});
+    fileHandle = h; await idbSet('file', h);
+    const p = await h.requestPermission({mode:'readwrite'});
+    await loadFromFile();
+    setStatus(p==='granted' ? 'linked' : 'readonly');
+    toast(`Verknüpft mit ${h.name} – wird ab jetzt automatisch geladen`);
+  }catch(e){ if(e.name!=='AbortError'){ console.error(e); toast('Datei konnte nicht geöffnet werden'); } }
+}
+async function createFile(){
+  try{
+    const h = await showSaveFilePicker({suggestedName:'priorisierer.json', types:[{description:'JSON',accept:{'application/json':['.json']}}]});
+    fileHandle = h; await idbSet('file', h);
+    await writeFile(); setStatus('linked');
+    toast(`${h.name} angelegt und verknüpft`);
+  }catch(e){ if(e.name!=='AbortError'){ console.error(e); toast('Datei konnte nicht angelegt werden'); } }
+}
+async function reconnect(){
+  try{
+    const p = await fileHandle.requestPermission({mode:'readwrite'});
+    if(p==='granted'){ await loadFromFile(); setStatus('linked'); toast('Datei wieder verbunden'); }
+  }catch(e){ console.error(e); toast('Verbindung fehlgeschlagen – Datei neu verknüpfen'); }
+}
+async function unlink(){
+  fileHandle = null; try{ await idbDel('file'); }catch(e){}
+  setStatus(FS_OK ? 'none' : 'unsupported'); toast('Verknüpfung gelöst – Daten bleiben im Browser');
+}
+function exportJson(){
+  const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'priorisierer.json'});
+  a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+async function boot(){
+  const cache = readCache();
+  state = cache ? normalize(cache) : demoData();
+  renderAll();
+  if(!FS_OK){ setStatus('unsupported'); return; }
+  try{
+    const h = await idbGet('file');
+    if(!h){ setStatus('none'); return; }
+    fileHandle = h;
+    const p = await h.queryPermission({mode:'readwrite'});
+    if(p==='granted'){ await loadFromFile(); setStatus('linked'); }
+    else setStatus('needs-permission');
+  }catch(e){ console.warn(e); setStatus('none'); }
+}
+
+/* =========================================================
+   Rendering
+   ========================================================= */
+const projById = id => state.projects.find(p=>p.id===id);
+const visible = () => state.tasks.filter(t => filter==='all' || t.project===filter);
+
+function renderAll(){ renderTabs(); renderList(); renderSide(); $('#capInput').value = state.settings.capacity; }
+
+function renderTabs(){
+  const sumPts = arr => arr.reduce((s,t)=>s+(t.points||0),0);
+  let html = `<button class="tab ${filter==='all'?'active':''}" data-f="all" type="button">
+      <span class="dot" style="--c:#003f5c"></span>Alle Projekte <span class="count">${state.tasks.length} · ${sumPts(state.tasks)} SP</span></button>`;
+  for(const p of state.projects){
+    const ts = state.tasks.filter(t=>t.project===p.id);
+    html += `<button class="tab ${filter===p.id?'active':''}" data-f="${esc(p.id)}" type="button" title="Doppelklick zum Umbenennen">
+      <span class="dot" style="--c:${esc(p.color)}"></span>${esc(p.name)} <span class="count">${ts.length} · ${sumPts(ts)} SP</span></button>`;
+  }
+  html += `<button class="tab add" data-f="__add" type="button">＋ Projekt</button>`;
+  $('#tabs').innerHTML = html;
+}
+
+function stripHTML(t, i){
+  const p = projById(t.project);
+  const opts = state.projects.map(pr=>`<option value="${esc(pr.id)}" ${pr.id===t.project?'selected':''}>${esc(pr.name)}</option>`).join('');
+  const urg = URG_ORDER.map(k=>`<button type="button" data-u="${k}" class="${t.urgency===k?'on':''}" style="--c:${URG[k].color}" title="${URG[k].label}" aria-label="${URG[k].label}"></button>`).join('');
+  const pts = FIB.map(n=>`<button type="button" data-p="${n}" class="${t.points===n?'on':''}" style="--pc:${PT_COLOR[n]};--pt:${PT_TEXT[n]}">${n}</button>`).join('');
+  return `
+  <article class="strip ${i===0?'top':''}" data-id="${esc(t.id)}" style="--urg:${URG[t.urgency].color}">
+    <div class="handle" tabindex="0" title="Ziehen oder Alt+↑/↓" aria-label="Verschieben">⋮⋮</div>
+    <div class="marker" title="Ampel: ${URG[t.urgency].label} (Klick = weiterschalten)"></div>
+    <div class="rank"><span class="rn">${String(i+1).padStart(2,'0')}</span>${i===0?'<small>JETZT</small>':''}</div>
+    <div class="cell">
+      <div class="title" contenteditable="plaintext-only" spellcheck="false" data-ph="Titel der Aufgabe …">${esc(t.title)}</div>
+      <div class="proj" style="--pc:${esc(p?.color||'#8aa0ad')}"><span class="pdot"></span><select aria-label="Projekt">${opts}</select></div>
+    </div>
+    <div class="cell note-cell"><div class="note" contenteditable="plaintext-only" data-ph="Notiz, nächster Schritt, Kontext …">${esc(t.note)}</div></div>
+    <div class="cell urg">${urg}</div>
+    <div class="cell pts">${pts}</div>
+    <div class="act"><button class="del" type="button" title="Löschen" aria-label="Löschen">×</button></div>
+  </article>`;
+}
+
+function renderList(){
+  const list = $('#list');
+  const vis = visible();
+  if(!vis.length){
+    list.innerHTML = `<div class="empty"><b>Hier ist noch nichts auf dem Radar.</b>Mit „＋ Aufgabe“ oder Taste <kbd>N</kbd> den ersten Streifen anlegen.</div>`;
+    return;
+  }
+  const cap = state.settings.capacity;
+  let cum = 0, capIdx = -1;
+  vis.forEach((t,i)=>{ if(capIdx<0 && cum + (t.points||0) > cap && i>0) capIdx = i; cum += t.points||0; });
+  let html = '';
+  vis.forEach((t,i)=>{
+    if(filter==='all' && i===capIdx) html += `<div class="capline">Kapazitätsgrenze ${cap} SP · darunter: nicht diese Woche</div>`;
+    html += stripHTML(t,i);
+  });
+  list.innerHTML = html;
+  if(filter==='all' && capIdx>0){
+    [...list.querySelectorAll('.strip')].slice(capIdx).forEach(el=>el.classList.add('over-cap'));
+  }
+}
+
+function renderSide(){
+  const all = state.tasks;
+  // Fokus
+  const top = visible()[0];
+  const fc = $('#focusCard');
+  if(top){
+    const p = projById(top.project);
+    fc.style.setProperty('--fc', URG[top.urgency].color);
+    $('#focusTitle').textContent = top.title || '(ohne Titel)';
+    $('#focusMeta').innerHTML = `<span>${esc(p?.name||'–')}</span><span>Ampel: <b>${URG[top.urgency].label}</b></span><span>Aufwand: <b>${top.points ?? '?'} SP</b></span>`;
+  }else{ $('#focusTitle').textContent = 'Nichts offen 🎉'; $('#focusMeta').innerHTML=''; }
+
+  // Kapazität (über alle Projekte, in Prio-Reihenfolge)
+  const cap = state.settings.capacity;
+  let cum = 0, fit = 0;
+  for(const t of all){ if(cum + (t.points||0) > cap && fit>0) break; cum += t.points||0; fit++; }
+  const total = all.reduce((s,t)=>s+(t.points||0),0);
+  const unest = all.filter(t=>t.points==null).length;
+  const bar = $('#capBar');
+  const segs = [];
+  let acc = 0;
+  for(const t of all.slice(0,fit)){ const w = Math.min(t.points||0, Math.max(0,cap-acc)); acc += w; if(w) segs.push(`<span style="width:${w/cap*100}%;background:${URG[t.urgency].color};border-right:1px solid #fff"></span>`); }
+  bar.innerHTML = segs.join('');
+  $('#capText').innerHTML = `Die <b>Top ${fit}</b> Aufgaben passen in deine Woche (<b>${cum}</b> von ${cap} SP).<br>Gesamt im Backlog: <b>${total} SP</b>${unest?` · <b>${unest}</b> noch ungeschätzt`:''}.`;
+
+  // Ampel
+  $('#urgRows').innerHTML = URG_ORDER.map(k=>{
+    const ts = all.filter(t=>t.urgency===k);
+    return `<div class="row" style="--c:${URG[k].color}"><span class="sw"></span><span>${URG[k].label}</span><span class="n">${ts.length} Stk.</span><span class="p">${ts.reduce((s,t)=>s+(t.points||0),0)} SP</span></div>`;
+  }).join('');
+  const reds = all.filter(t=>t.urgency==='red').length;
+  const firstNonRed = all.findIndex(t=>t.urgency!=='red');
+  const redBelow = firstNonRed>=0 && all.slice(firstNonRed).some(t=>t.urgency==='red');
+  let hint = '';
+  if(all.length && reds/all.length > 0.3) hint = `<div class="warn">⚠ ${Math.round(reds/all.length*100)} % sind rot. Wenn alles dringend ist, ist nichts dringend – max. 2–3 echte Rote.</div>`;
+  else if(redBelow) hint = `<div class="warn">⚠ Eine rote Aufgabe liegt unter einer nicht-roten. Bewusst so entschieden?</div>`;
+  else if(all.length) hint = `<div class="ok">✓ Ampel und Reihenfolge passen zusammen.</div>`;
+  $('#urgHint').innerHTML = hint;
+
+  // Projekte
+  const maxP = Math.max(1, ...state.projects.map(p=>all.filter(t=>t.project===p.id).reduce((s,t)=>s+(t.points||0),0)));
+  $('#projRows').innerHTML = state.projects.map(p=>{
+    const ts = all.filter(t=>t.project===p.id);
+    const sp = ts.reduce((s,t)=>s+(t.points||0),0);
+    return `<div class="row" style="--c:${esc(p.color)}"><span class="sw"></span><span>${esc(p.name)}<div class="bar" style="margin:5px 0 0;height:4px"><span style="width:${sp/maxP*100}%;background:${esc(p.color)}"></span></div></span><span class="n">${ts.length} Stk.</span><span class="p">${sp} SP</span></div>`;
+  }).join('') || '<div class="small">Noch keine Projekte.</div>';
+}
+
+/* =========================================================
+   Aktionen
+   ========================================================= */
+const taskOf = el => state.tasks.find(t=>t.id===el.closest('.strip')?.dataset.id);
+
+function addTask(){
+  const project = filter!=='all' ? filter : (state.projects[0]?.id ?? null);
+  const t = {id:uid(), title:'', note:'', project, urgency:'green', points:null};
+  state.tasks.push(t);                // neue Aufgaben starten unten – sie müssen sich hocharbeiten
+  save(); renderAll();
+  const el = $(`.strip[data-id="${t.id}"] .title`);
+  el?.scrollIntoView({block:'center'}); el?.focus();
+}
+
+function addProject(){
+  const name = prompt('Name des neuen Projekts:');
+  if(!name?.trim()) return;
+  const used = new Set(state.projects.map(p=>p.color));
+  const color = PROJECT_COLORS.find(c=>!used.has(c)) || PROJECT_COLORS[state.projects.length % PROJECT_COLORS.length];
+  const p = {id:uid(), name:name.trim(), color};
+  state.projects.push(p); filter = p.id; save(); renderAll();
+}
+
+/* Reihenfolge der sichtbaren Aufgaben in die Gesamtliste zurückschreiben */
+function applyVisibleOrder(ids){
+  const byId = Object.fromEntries(state.tasks.map(t=>[t.id,t]));
+  const slots = []; state.tasks.forEach((t,i)=>{ if(ids.includes(t.id)) slots.push(i); });
+  const next = [...state.tasks];
+  slots.forEach((gi,k)=> next[gi] = byId[ids[k]]);
+  state.tasks = next;
+}
+
+function moveTask(id, dir){
+  const ids = visible().map(t=>t.id);
+  const i = ids.indexOf(id), j = i + dir;
+  if(i<0 || j<0 || j>=ids.length) return;
+  [ids[i], ids[j]] = [ids[j], ids[i]];
+  applyVisibleOrder(ids); save(); renderAll();
+  $(`.strip[data-id="${id}"] .handle`)?.focus();
+}
+
+function renumber(){
+  $('#list').querySelectorAll('.strip').forEach((el,i)=>{ el.querySelector('.rn').textContent = String(i+1).padStart(2,'0'); });
+}
+
+/* ---------- Ereignisse: Liste ---------- */
+const list = $('#list');
+
+list.addEventListener('input', e=>{
+  const t = taskOf(e.target); if(!t) return;
+  if(e.target.classList.contains('title')) { t.title = e.target.textContent; renderSide(); }
+  if(e.target.classList.contains('note'))  t.note  = e.target.textContent;
+  save();
+});
+list.addEventListener('keydown', e=>{
+  if(e.target.matches('[contenteditable]') && e.key==='Enter'){ e.preventDefault(); e.target.blur(); }
+  if(e.target.matches('[contenteditable]') && e.key==='Escape'){ e.target.blur(); }
+  if(e.altKey && (e.key==='ArrowUp' || e.key==='ArrowDown')){
+    const t = taskOf(e.target); if(!t) return;
+    e.preventDefault(); moveTask(t.id, e.key==='ArrowUp' ? -1 : 1);
+  }
+  if(e.target.classList.contains('handle') && !e.altKey && (e.key==='ArrowUp' || e.key==='ArrowDown')){
+    e.preventDefault(); moveTask(taskOf(e.target).id, e.key==='ArrowUp' ? -1 : 1);
+  }
+});
+list.addEventListener('change', e=>{
+  if(e.target.matches('.proj select')){ const t = taskOf(e.target); t.project = e.target.value; save(); renderAll(); }
+});
+list.addEventListener('click', e=>{
+  const t = taskOf(e.target); if(!t) return;
+  const u = e.target.closest('[data-u]');
+  const p = e.target.closest('[data-p]');
+  if(u){ t.urgency = u.dataset.u; save(); renderAll(); return; }
+  if(p){ const n = Number(p.dataset.p); t.points = t.points===n ? null : n; save(); renderAll(); return; }
+  if(e.target.classList.contains('marker')){
+    t.urgency = URG_ORDER[(URG_ORDER.indexOf(t.urgency)+1) % URG_ORDER.length]; save(); renderAll(); return;
+  }
+  if(e.target.closest('.del')){
+    if(!t.title.trim() && !t.note.trim() || confirm(`„${t.title}“ löschen?`)){
+      state.tasks = state.tasks.filter(x=>x!==t); save(); renderAll();
+    }
+  }
+});
+
+/* ---------- Drag & Drop (Griff ⋮⋮ oder Prio-Nummer) ---------- */
+let dragEl = null;
+list.addEventListener('mousedown', e=>{
+  const grip = e.target.closest('.handle, .rank');
+  if(grip) grip.closest('.strip').draggable = true;
+});
+list.addEventListener('mouseup', ()=> list.querySelectorAll('.strip[draggable="true"]').forEach(s=>s.draggable=false));
+list.addEventListener('dragstart', e=>{
+  dragEl = e.target.closest('.strip'); if(!dragEl) return;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragEl.dataset.id);
+  list.classList.add('dnd');
+  requestAnimationFrame(()=> dragEl?.classList.add('dragging'));
+});
+list.addEventListener('dragover', e=>{
+  if(!dragEl) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  const others = [...list.querySelectorAll('.strip:not(.dragging)')];
+  const after = others.find(el=>{ const r = el.getBoundingClientRect(); return e.clientY < r.top + r.height/2; });
+  if(after){ if(after.previousElementSibling !== dragEl) list.insertBefore(dragEl, after); }
+  else if(list.lastElementChild !== dragEl) list.appendChild(dragEl);
+  renumber();
+});
+list.addEventListener('drop', e=> e.preventDefault());
+list.addEventListener('dragend', ()=>{
+  if(!dragEl) return;
+  dragEl.classList.remove('dragging'); dragEl.draggable = false;
+  list.classList.remove('dnd');
+  const ids = [...list.querySelectorAll('.strip')].map(el=>el.dataset.id);
+  dragEl = null;
+  applyVisibleOrder(ids); save(); renderAll();
+});
+
+/* ---------- Ereignisse: Kopf, Tabs, Seitenleiste ---------- */
+$('#addBtn').addEventListener('click', addTask);
+$('#tabs').addEventListener('click', e=>{
+  const b = e.target.closest('.tab'); if(!b) return;
+  if(b.dataset.f==='__add') return addProject();
+  filter = b.dataset.f; renderAll();
+});
+$('#tabs').addEventListener('dblclick', e=>{
+  const b = e.target.closest('.tab'); const p = b && projById(b.dataset.f); if(!p) return;
+  const name = prompt('Projekt umbenennen:', p.name);
+  if(name?.trim()){ p.name = name.trim(); save(); renderAll(); }
+});
+$('#capInput').addEventListener('change', e=>{
+  const v = Math.max(1, Math.round(Number(e.target.value)||20));
+  state.settings.capacity = v; save(); renderAll();
+});
+
+const menu = $('#fileMenu');
+$('#fileBtn').addEventListener('click', e=>{ e.stopPropagation(); menu.classList.toggle('open'); });
+document.addEventListener('click', e=>{ if(!menu.contains(e.target)) menu.classList.remove('open'); });
+menu.querySelectorAll('[data-act="open"],[data-act="create"]').forEach(b=> b.disabled = !FS_OK);
+menu.addEventListener('click', async e=>{
+  const b = e.target.closest('[data-act]'); if(!b || b.disabled) return;
+  menu.classList.remove('open');
+  const act = b.dataset.act;
+  if(act==='open') openFile();
+  if(act==='create') createFile();
+  if(act==='unlink') unlink();
+  if(act==='export') exportJson();
+  if(act==='import') $('#importInput').click();
+  if(act==='demo' && confirm('Aktuelle Daten durch Demo-Daten ersetzen?')){ state = demoData(); filter='all'; save(); renderAll(); }
+});
+$('#importInput').addEventListener('change', async e=>{
+  const f = e.target.files[0]; if(!f) return;
+  try{ state = normalize(JSON.parse(await f.text())); filter='all'; save(); renderAll(); toast(`${f.name} importiert`); }
+  catch(err){ toast('Keine gültige JSON-Datei'); }
+  e.target.value = '';
+});
+$('#status').addEventListener('click', e=>{
+  if(fileStatus==='needs-permission') reconnect();
+  else if(fileStatus==='none' || fileStatus==='unsupported'){ e.stopPropagation(); menu.classList.add('open'); }
+});
+
+document.addEventListener('keydown', e=>{
+  const typing = e.target.matches('input, select, textarea, [contenteditable]');
+  if(!typing && (e.key==='n' || e.key==='N') && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); addTask(); }
+});
+
+let toastT;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+boot();
+</script>
+</body>
+</html>
