@@ -169,7 +169,7 @@ svg.i{width:14px;height:14px;flex:none}
 .ot-kicker .star{color:var(--amber)}
 .ot-title{margin-top:4px; font-weight:700; font-size:24px; line-height:1.25; letter-spacing:-.01em; color:var(--navy);
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.ot-title.empty{color:var(--muted); font-weight:600}
+.ot-title.is-empty{color:var(--muted); font-weight:600}
 .ot-meta{margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center}
 .chip{display:inline-flex; align-items:center; gap:6px; height:24px; padding:0 10px; border-radius:999px;
   background:var(--surface-2); border:1px solid var(--line); font-size:12px; color:var(--muted); white-space:nowrap}
@@ -504,6 +504,29 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
   opacity:0; transition:.25s; pointer-events:none; font-size:13.5px; font-weight:500; z-index:300;
 }
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast{display:flex; align-items:center; gap:16px}
+.toast.has-action{pointer-events:auto}
+.toast button{border:0; background:none; padding:0; color:var(--amber); font-weight:700}
+.toast button:hover{text-decoration:underline}
+
+.welcome{width:min(620px, 94vw)}
+.wl-body{padding:30px 32px 24px}
+.wl-body h2{margin:14px 0 6px; font-size:22px; color:var(--navy)}
+.wl-body p{margin:0; color:var(--muted); line-height:1.5}
+.wl-actions{display:flex; flex-direction:column; gap:10px; margin:20px 0 16px}
+.wl-opt{
+  display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left;
+  padding:14px 16px; border-radius:10px; border:1px solid var(--line); background:#fff;
+  box-shadow:inset 4px 0 0 var(--c, var(--line-strong));
+}
+.wl-opt b{font-size:15px; color:var(--ink)}
+.wl-opt span{font-size:13px; color:var(--muted)}
+.wl-opt:hover{border-color:var(--navy); background:var(--surface-2)}
+.wl-opt:focus{outline:none}
+.wl-opt:focus-visible{outline:2px solid var(--navy); outline-offset:2px}
+.wl-body h2:focus{outline:none}
+.bak-row{display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 0; border-top:1px solid var(--line)}
+.bak-row:first-child{border-top:0}
 #confetti{position:fixed; inset:0; pointer-events:none; z-index:250}
 .celebrate{position:fixed; inset:0; display:grid; place-items:center; pointer-events:none; z-index:240; opacity:0}
 .celebrate.show{animation:cbFade 2.6s ease forwards}
@@ -544,7 +567,7 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
       <rect x="2" y="10.5" width="22" height="5" rx="1.5" fill="#ffa600"/>
       <rect x="2" y="18" width="22" height="5" rx="1.5" fill="#238b4a"/>
     </svg>
-    Priorisierer 3000 <small>Mockup v0.3</small>
+    Priorisierer 3000 <small>v1.0</small>
   </div>
   <div class="spacer"></div>
   <button class="status" id="status" data-s="none" type="button"><span class="led"></span><span id="statusText">Nicht verknüpft</span></button>
@@ -558,7 +581,8 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
       <button data-act="export" type="button">Als JSON herunterladen<span class="sub">Backup oder Weg ohne Dateizugriff</span></button>
       <button data-act="import" type="button">JSON importieren (einmalig)</button>
       <hr>
-      <button data-act="demo" type="button">Demo-Daten laden</button>
+      <button data-act="backups" type="button">Sicherung wiederherstellen<span class="sub">Automatische Tagesstände der letzten 14 Tage</span></button>
+      <button data-act="demo" type="button">Beispieldaten ansehen<span class="sub">Nur ohne verknüpfte Datei</span></button>
     </div>
   </div>
   <button class="btn btn-primary" id="addBtn" type="button">＋ Aufgabe</button>
@@ -652,6 +676,7 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
         <span><kbd>N</kbd></span><span>Neue Aufgabe</span>
         <span>✓ Haken</span><span>Erledigt, wird gefeiert</span>
         <span>Warten auf</span><span>Unter dem Titel aufklappen</span>
+        <span><kbd>Strg</kbd> <kbd>Z</kbd></span><span>Letzte Aktion rückgängig</span>
         <span>Farbbalken</span><span>Klick schaltet die Ampel weiter</span>
       </div>
     </section>
@@ -671,6 +696,33 @@ kbd{font-family:var(--font);font-size:11px;font-weight:600;background:var(--surf
     <button class="btn btn-navy" type="submit">＋ Hinzufügen</button>
     <span class="small" id="pmSum"></span>
   </form>
+</dialog>
+
+<!-- Erster Start -->
+<dialog class="dlg welcome" id="welcomeDlg" aria-labelledby="wlTitle">
+  <div class="wl-body">
+    <svg width="40" height="40" viewBox="0 0 26 26" aria-hidden="true">
+      <rect x="2" y="3"  width="22" height="5" rx="1.5" fill="#f9596f"/>
+      <rect x="2" y="10.5" width="22" height="5" rx="1.5" fill="#ffa600"/>
+      <rect x="2" y="18" width="22" height="5" rx="1.5" fill="#238b4a"/>
+    </svg>
+    <h2 id="wlTitle" tabindex="-1" autofocus>Willkommen beim Priorisierer</h2>
+    <p>Deine Aufgaben liegen in einer JSON-Datei auf deinem Rechner. Einmal verknüpft, wird sie bei jedem Start automatisch geladen und jede Änderung sofort gespeichert.</p>
+    <div class="wl-actions">
+      <button class="wl-opt" type="button" data-wl="create" style="--c:var(--green)"><b>Neue Datei anlegen</b><span>Mit einer leeren Liste starten</span></button>
+      <button class="wl-opt" type="button" data-wl="open" style="--c:var(--indigo)"><b>Bestehende Datei verknüpfen</b><span>Eine vorhandene priorisierer.json öffnen</span></button>
+      <button class="wl-opt" type="button" data-wl="empty" style="--c:var(--green)"><b>Leer starten</b><span>Daten bleiben im Browser, Sicherung über Export</span></button>
+      <button class="wl-opt" type="button" data-wl="demo" style="--c:var(--amber)"><b>Erst einmal ausprobieren</b><span>Mit Beispieldaten, ohne Datei</span></button>
+    </div>
+    <p class="small" id="wlNote"></p>
+  </div>
+</dialog>
+
+<!-- Sicherungen -->
+<dialog class="dlg" id="bakDlg" aria-labelledby="bakTitle" style="width:min(640px,94vw)">
+  <div class="dlg-head"><h2 id="bakTitle">Sicherung wiederherstellen</h2><button class="icon-btn" type="button" data-close aria-label="Schließen">×</button></div>
+  <div class="dlg-sub">Der Priorisierer legt jeden Tag automatisch den ersten Stand des Tages im Browser ab. Die letzten 14 Tage bleiben erhalten. Eine Wiederherstellung lässt sich rückgängig machen.</div>
+  <div class="pm-body" id="bakRows" style="padding-bottom:16px"></div>
 </dialog>
 
 <div class="celebrate" id="celebrate">
@@ -703,7 +755,6 @@ const PRAISE = ['Erledigt. Stark!','Abgehakt. Weiter so.','Ein Streifen weniger 
 const LS_KEY = 'priorisierer3000.cache';
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 const CLOCK_SVG = '<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.3 1.5"/></svg>';
-const FLAME_SVG = '<svg class="i" viewBox="0 0 16 16"><path d="M8.2 1.2c.4 2.4 4 3.9 4 7.7A4.2 4.2 0 0 1 8 13.1a4.2 4.2 0 0 1-4.2-4.2c0-1.8.9-3 1.8-3.9.1 1.3.8 2.2 1.7 2.5C6.9 5.6 7.4 3.3 8.2 1.2Z" fill="#ff7a47"/></svg>';
 const SLIDERS_SVG = '<svg class="i" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4.5h7M12.5 4.5H14M2 11.5h1.5M7 11.5h7"/><circle cx="10.7" cy="4.5" r="1.7"/><circle cx="5.3" cy="11.5" r="1.7"/></svg>';
 
 const $ = s => document.querySelector(s);
@@ -780,8 +831,9 @@ function demoData(){
     W(byTitle('KPI-Dashboard'), null, 'Data-Team', 'Lesezugriff auf die Datenquelle', -8, -4, 'received', 'Zugang eingerichtet, Login über SSO', -2),
     W(null, 'p3', 'HR, Frau Krämer', 'Stellenbeschreibung Teamleitung', -2, 7),
   ];
-  return { app:'Priorisierer3000', version:2, settings:{capacity:20}, projects:P, tasks, waits, updated:new Date().toISOString() };
+  return { app:'Priorisierer3000', version:2, demo:true, settings:{capacity:20}, projects:P, tasks, waits, updated:new Date().toISOString() };
 }
+const emptyData = () => normalize({});
 
 function normalize(d){
   d = d && typeof d==='object' ? d : {};
@@ -810,7 +862,7 @@ function normalize(d){
     receivedAt: isoValid(w.receivedAt) ? w.receivedAt : null,
   })) : [];
   return {
-    app:'Priorisierer3000', version:2,
+    app:'Priorisierer3000', version:2, ...(d.demo ? {demo:true} : {}),
     settings:{capacity: Number(d.settings?.capacity) > 0 ? Number(d.settings.capacity) : 20},
     projects, tasks, waits, updated:d.updated || new Date().toISOString(),
   };
@@ -853,9 +905,13 @@ function sortWaits(a,b){
    (File System Access API – Edge & Chrome)
    ========================================================= */
 const FS_OK = 'showOpenFilePicker' in window;
+const SNAP_PREFIX = 'priorisierer3000.snap.';
+const SNAP_KEEP = 14;
+const JSON_TYPES = [{description:'JSON',accept:{'application/json':['.json']}}];
 let fileHandle = null;
 let fileStatus = 'none';
 let saveTimer = null;
+let lastMod = 0;                  // lastModified der Datei nach dem letzten eigenen Lesen/Schreiben
 
 function idb(){
   return new Promise((res,rej)=>{
@@ -881,7 +937,28 @@ const idbDel = k => idbOp('readwrite', s => s.delete(k));
 function cacheLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
 function readCache(){ try{ const s = localStorage.getItem(LS_KEY); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
 
-function setStatus(s, extra){
+/* ---------- Tägliche Sicherung im Browser (erster Stand des Tages, 14 Tage) ---------- */
+function snapshotDaily(){
+  if(!state || state.demo) return;
+  try{
+    const key = SNAP_PREFIX + today();
+    if(!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(state));
+    listSnapshots().slice(SNAP_KEEP).forEach(s => localStorage.removeItem(SNAP_PREFIX + s.date));
+  }catch(e){}
+}
+function listSnapshots(){
+  const out = [];
+  try{
+    for(let i=0; i<localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith(SNAP_PREFIX)) out.push({date:k.slice(SNAP_PREFIX.length)});
+    }
+  }catch(e){}
+  return out.sort((a,b)=>b.date.localeCompare(a.date));
+}
+function readSnapshot(date){ try{ return JSON.parse(localStorage.getItem(SNAP_PREFIX + date)); }catch(e){ return null; } }
+
+function setStatus(s){
   fileStatus = s;
   const el = $('#status'), txt = $('#statusText');
   el.dataset.s = s;
@@ -891,95 +968,152 @@ function setStatus(s, extra){
     'linked':           `${name} · gespeichert ${time}`,
     'saving':           `${name} · speichere …`,
     'needs-permission': `${name} wieder verbinden (1 Klick)`,
-    'none':             'Keine JSON verknüpft · nur Browser-Speicher',
+    'none':             state?.demo ? 'Beispieldaten · keine Datei verknüpft' : 'Keine JSON verknüpft · nur Browser-Speicher',
     'unsupported':      'Browser ohne Dateizugriff · Export nutzen',
     'readonly':         `${name} · nur lesen`,
-    'error':            `Fehler beim Speichern ${extra||''}`,
+    'invalid':          `${name} ist kein gültiges JSON · nichts gespeichert`,
+    'conflict':         `${name} wurde extern geändert`,
+    'error':            `${name} · Fehler beim Speichern`,
   }[s] || s;
-  el.title = s === 'linked' ? 'Änderungen werden automatisch in die verknüpfte Datei geschrieben.' : '';
+  el.title = {
+    linked:'Änderungen werden automatisch in die verknüpfte Datei geschrieben.',
+    invalid:'Die Datei wird nicht überschrieben. Bitte Datei prüfen oder neu verknüpfen.',
+    error:'Klick: erneut versuchen',
+  }[s] || '';
 }
 
-async function loadFromFile(){
+/* Liest die verknüpfte Datei. Gibt false zurück, wenn sie nicht geladen werden konnte. */
+async function loadFromFile({silent=false} = {}){
   const file = await fileHandle.getFile();
+  lastMod = file.lastModified;
   const text = await file.text();
-  if(!text.trim()){ await writeFile(); return; }
-  const fromFile = normalize(JSON.parse(text));
+  if(!text.trim()){ state.demo && (state = emptyData()); await writeFile({force:true}); return true; }
+  let parsed;
+  try{ parsed = JSON.parse(text); }
+  catch(e){ setStatus('invalid'); toast('Die verknüpfte Datei ist kein gültiges JSON. Es wird nichts überschrieben.'); return false; }
+  const fromFile = normalize(parsed); delete fromFile.demo;
   const cache = readCache();
-  if(cache && cache.updated && fromFile.updated && cache.updated > fromFile.updated){
+  if(!silent && cache && !cache.demo && cache.updated && fromFile.updated && cache.updated > fromFile.updated){
     const c = normalize(cache);
     const differs = JSON.stringify([c.tasks,c.waits,c.projects]) !== JSON.stringify([fromFile.tasks,fromFile.waits,fromFile.projects]);
     if(differs && confirm('Im Browser liegen neuere Änderungen als in der Datei.\n\nOK = Browser-Stand in die Datei übernehmen\nAbbrechen = Datei-Stand laden')){
-      await writeFile(); return;
+      state = c; delete state.demo; await writeFile({force:true}); renderAll(); return true;
     }
   }
-  state = fromFile; cacheLocal(); renderAll();
+  state = fromFile; cacheLocal(); snapshotDaily(); renderAll();
+  return true;
 }
-async function writeFile(){
+
+/* Schreibt den Stand in die Datei. Wurde die Datei inzwischen von außen geändert, wird nicht still überschrieben. */
+async function writeFile({force=false} = {}){
+  if(!force && lastMod){
+    const f = await fileHandle.getFile();
+    if(f.lastModified !== lastMod) throw Object.assign(new Error('Datei extern geändert'), {conflict:true});
+  }
   const w = await fileHandle.createWritable();
   await w.write(JSON.stringify(state, null, 2));
   await w.close();
+  lastMod = (await fileHandle.getFile()).lastModified;
+}
+
+async function handleConflict(){
+  setStatus('conflict');
+  const reload = confirm('Die Datei wurde außerhalb dieses Fensters geändert, zum Beispiel an einem anderen PC.\n\nOK = Stand aus der Datei laden (deine letzte Änderung hier wird verworfen)\nAbbrechen = deinen Stand hier in die Datei schreiben');
+  try{
+    if(reload){ if(await loadFromFile({silent:true})){ setStatus('linked'); toast('Stand aus der Datei geladen'); } }
+    else { await writeFile({force:true}); setStatus('linked'); }
+  }catch(e){ console.error(e); setStatus('error'); }
+}
+
+function flushSave(){
+  saveTimer = null;
+  return writeFile().then(()=> setStatus('linked')).catch(e=>{
+    if(e.conflict) return handleConflict();
+    console.error(e); setStatus('error');
+  });
 }
 
 function save(){
   state.updated = new Date().toISOString();
-  cacheLocal();
+  cacheLocal(); snapshotDaily();
   if(fileHandle && ['linked','saving','error'].includes(fileStatus)){
     setStatus('saving');
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(async ()=>{
-      try{ await writeFile(); setStatus('linked'); }
-      catch(e){ console.error(e); setStatus('error'); }
-    }, 400);
+    saveTimer = setTimeout(flushSave, 400);
   }
 }
 
+/* Datei wurde z. B. über OneDrive auf einem anderen PC geändert → beim Zurückkehren neu laden */
+async function checkExternal(){
+  if(!fileHandle || fileStatus!=='linked' || saveTimer || !lastMod) return;
+  try{
+    const f = await fileHandle.getFile();
+    if(f.lastModified !== lastMod && await loadFromFile({silent:true})) toast('Neuer Stand aus der Datei geladen');
+  }catch(e){}
+}
+
+async function linkHandle(h){
+  fileHandle = h; lastMod = 0;
+  await idbSet('file', h);
+}
 async function openFile(){
   try{
-    const [h] = await showOpenFilePicker({types:[{description:'JSON',accept:{'application/json':['.json']}}]});
-    fileHandle = h; await idbSet('file', h);
+    const [h] = await showOpenFilePicker({types:JSON_TYPES});
+    await linkHandle(h);
     const p = await h.requestPermission({mode:'readwrite'});
-    await loadFromFile();
+    if(!await loadFromFile()) return;
     setStatus(p==='granted' ? 'linked' : 'readonly');
-    toast(`Verknüpft mit ${h.name}, wird ab jetzt automatisch geladen`);
+    toast(`Verknüpft mit ${h.name}. Wird ab jetzt bei jedem Start geladen.`);
   }catch(e){ if(e.name!=='AbortError'){ console.error(e); toast('Datei konnte nicht geöffnet werden'); } }
 }
-async function createFile(){
+async function createFile({fresh=false} = {}){
   try{
-    const h = await showSaveFilePicker({suggestedName:'priorisierer.json', types:[{description:'JSON',accept:{'application/json':['.json']}}]});
-    fileHandle = h; await idbSet('file', h);
-    await writeFile(); setStatus('linked');
+    const h = await showSaveFilePicker({suggestedName:'priorisierer.json', types:JSON_TYPES});
+    if(fresh || (state.demo && !confirm('Beispieldaten in die neue Datei übernehmen?\n\nOK = übernehmen\nAbbrechen = mit leerer Liste starten'))){
+      state = emptyData(); filter = 'all'; view = 'tasks'; openPanels.clear();
+    }
+    delete state.demo;
+    await linkHandle(h);
+    await writeFile({force:true}); cacheLocal(); snapshotDaily();
+    setStatus('linked'); renderAll();
     toast(`${h.name} angelegt und verknüpft`);
   }catch(e){ if(e.name!=='AbortError'){ console.error(e); toast('Datei konnte nicht angelegt werden'); } }
 }
 async function reconnect(){
   try{
     const p = await fileHandle.requestPermission({mode:'readwrite'});
-    if(p==='granted'){ await loadFromFile(); setStatus('linked'); toast('Datei wieder verbunden'); }
+    if(p==='granted' && await loadFromFile()){ setStatus('linked'); toast('Datei wieder verbunden'); }
   }catch(e){ console.error(e); toast('Verbindung fehlgeschlagen, bitte Datei neu verknüpfen'); }
 }
 async function unlink(){
-  fileHandle = null; try{ await idbDel('file'); }catch(e){}
-  setStatus(FS_OK ? 'none' : 'unsupported'); toast('Verknüpfung gelöst, Daten bleiben im Browser');
+  fileHandle = null; lastMod = 0; clearTimeout(saveTimer); saveTimer = null;
+  try{ await idbDel('file'); }catch(e){}
+  setStatus(FS_OK ? 'none' : 'unsupported'); toast('Verknüpfung gelöst. Die Daten bleiben im Browser.');
 }
 function exportJson(){
   const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'priorisierer.json'});
+  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:`priorisierer-${today()}.json`});
   a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
 
 async function boot(){
   const cache = readCache();
-  state = cache ? normalize(cache) : demoData();
+  state = cache ? normalize(cache) : emptyData();
   renderAll();
-  if(!FS_OK){ setStatus('unsupported'); return; }
+  let h = null;
+  if(FS_OK){ try{ h = await idbGet('file'); }catch(e){ console.warn(e); } }
+  if(!h){
+    setStatus(FS_OK ? 'none' : 'unsupported');
+    snapshotDaily();
+    if(!cache) openWelcome();
+    return;
+  }
+  fileHandle = h;
   try{
-    const h = await idbGet('file');
-    if(!h){ setStatus('none'); return; }
-    fileHandle = h;
     const p = await h.queryPermission({mode:'readwrite'});
-    if(p==='granted'){ await loadFromFile(); setStatus('linked'); }
+    if(p==='granted'){ if(await loadFromFile()) setStatus('linked'); }
     else setStatus('needs-permission');
-  }catch(e){ console.warn(e); setStatus('none'); }
+  }catch(e){ console.warn(e); setStatus('needs-permission'); }
 }
 
 /* =========================================================
@@ -1086,26 +1220,17 @@ function renderTabs(){
   $('#tabs').innerHTML = html;
 }
 
-function streakInfo(){
-  const t0 = today();
-  const doneToday = state.tasks.filter(t=>t.done && t.doneAt && isoDate(new Date(t.doneAt))===t0).length;
-  const days = new Set(state.tasks.filter(t=>t.done && t.wasOneThing && t.doneAt).map(t=>isoDate(new Date(t.doneAt))));
-  const d = new Date();
-  if(!days.has(isoDate(d))) d.setDate(d.getDate()-1);
-  let streak = 0;
-  while(days.has(isoDate(d))){ streak++; d.setDate(d.getDate()-1); }
-  return {doneToday, streak, todayDone: days.has(t0)};
-}
+const doneTodayCount = () => state.tasks.filter(t=>t.done && t.doneAt && isoDate(new Date(t.doneAt))===today()).length;
 
 function renderOneThing(){
   const t = oneThing();
   const box = $('#oneThing'), title = $('#otTitle');
-  const {doneToday, streak, todayDone} = streakInfo();
+  const doneToday = doneTodayCount();
   if(t){
     const p = projById(t.project);
     box.style.setProperty('--otc', URG[t.urgency].color);
     title.textContent = t.title || 'Ohne Titel';
-    title.classList.toggle('empty', !t.title);
+    title.classList.toggle('is-empty', !t.title);
     title.title = t.title;
     let meta = `<span class="chip"><span class="sw" style="--c:${esc(p?.color||'#c3cfd8')}"></span>${esc(p?.name||'Ohne Projekt')}</span>`;
     meta += `<span class="chip"><span class="sw" style="--c:${URG[t.urgency].color};border-radius:50%"></span>${URG[t.urgency].label}</span>`;
@@ -1118,14 +1243,15 @@ function renderOneThing(){
     $('#otDone').disabled = false;
   }else{
     box.style.setProperty('--otc', URG.green.color);
-    title.textContent = 'Alles erledigt. Zeit für eine Pause.';
-    title.classList.add('empty');
+    title.textContent = state.tasks.length ? 'Alles erledigt. Zeit für eine Pause.' : 'Noch keine Aufgaben. Leg mit „＋ Aufgabe“ los.';
+    title.classList.add('is-empty');
     $('#otMeta').innerHTML = '';
     $('#otDone').disabled = true;
   }
+  const left = openTasks().length;
   $('#otStats').innerHTML =
     `<span><b>${doneToday}</b> heute erledigt</span>` +
-    `<span>${streak ? `${FLAME_SVG}<b>${streak}</b> ${streak===1?'Tag':'Tage'} One-Thing-Serie${!todayDone ? ', heute halten' : ''}` : 'Starte heute deine Serie'}</span>`;
+    `<span><b>${left}</b> offen</span>`;
   const id = t?.id || null;
   if(lastOneId !== null && id !== lastOneId){ box.classList.remove('swap'); void box.offsetWidth; box.classList.add('swap'); }
   lastOneId = id;
@@ -1320,6 +1446,7 @@ function renumber(){
 async function completeTask(t, srcEl){
   if(!t || completing.has(t.id)) return;
   completing.add(t.id);
+  const snap = snapshotState();
   const isOne = oneThing()?.id === t.id;
   const r = srcEl.getBoundingClientRect();
   const cx = r.left + r.width/2, cy = r.top + r.height/2;
@@ -1346,7 +1473,7 @@ async function completeTask(t, srcEl){
   openPanels.delete(t.id);
   completing.delete(t.id);
   save(); renderAll();
-  toast(isOne ? 'The One Thing ist erledigt. Stark!' : PRAISE[Math.floor(Math.random()*PRAISE.length)]);
+  undoable(isOne ? 'The One Thing ist erledigt. Stark!' : PRAISE[Math.floor(Math.random()*PRAISE.length)], snap);
 }
 
 function restoreTask(t){
@@ -1444,9 +1571,9 @@ list.addEventListener('click', e=>{
   if(w){
     if(hit('.w-check')) return toggleWait(w);
     if(hit('.w-del')){
-      if((!w.who.trim() && !w.what.trim()) || confirm(`Warte-Eintrag „${w.who || w.what}“ löschen?`)){
-        state.waits = state.waits.filter(x=>x!==w); save(); renderAll();
-      }
+      const snap = snapshotState();
+      state.waits = state.waits.filter(x=>x!==w); save(); renderAll();
+      if(w.who.trim() || w.what.trim()) undoable(`Warte-Eintrag „${w.who || w.what}“ gelöscht`, snap);
     }
     return;
   }
@@ -1460,10 +1587,10 @@ list.addEventListener('click', e=>{
   if(hit('.check')){ completeTask(t, hit('.check')); return; }
   if(hit('.restore')){ restoreTask(t); return; }
   if(hit('.del')){
-    if((!t.title.trim() && !t.note.trim()) || confirm(`„${t.title}“ löschen?\n\nVerknüpfte Warte-Einträge bleiben in der Liste „Warte auf“ erhalten.`)){
-      waitsOf(t).forEach(w=> w.taskId = null);
-      state.tasks = state.tasks.filter(x=>x!==t); save(); renderAll();
-    }
+    const snap = snapshotState();
+    waitsOf(t).forEach(w=> w.taskId = null);       // Warte-Einträge bleiben in „Warte auf“ erhalten
+    state.tasks = state.tasks.filter(x=>x!==t); openPanels.delete(t.id); save(); renderAll();
+    if(t.title.trim() || t.note.trim()) undoable(`„${t.title || 'Aufgabe'}“ gelöscht`, snap);
   }
 });
 
@@ -1567,13 +1694,14 @@ $('#pmRows').addEventListener('click', e=>{
   }
   if(hit('.pm-del')){
     const used = state.tasks.some(t=>t.project===p.id) || state.waits.some(w=>w.project===p.id);
-    if(!used){ deleteProject(p.id); save(); renderPM(); renderAll(); toast(`Projekt „${p.name}“ gelöscht`); return; }
+    if(!used){ const snap = snapshotState(); deleteProject(p.id); save(); renderPM(); renderAll(); undoable(`Projekt „${p.name}“ gelöscht`, snap); return; }
     pmConfirm = pmConfirm===p.id ? null : p.id; pmPalette = null; renderPM(); return;
   }
   if(hit('.pm-cancel')){ pmConfirm = null; renderPM(); return; }
   if(hit('.pm-do')){
+    const snap = snapshotState();
     deleteProject(p.id, row.querySelector('.pm-target').value);
-    pmConfirm = null; save(); renderPM(); renderAll(); toast(`Projekt „${p.name}“ gelöscht`);
+    pmConfirm = null; save(); renderPM(); renderAll(); undoable(`Projekt „${p.name}“ gelöscht`, snap);
   }
 });
 $('#pmRows').addEventListener('input', e=>{
@@ -1622,9 +1750,13 @@ $('#capInput').addEventListener('change', e=>{
 });
 
 const menu = $('#fileMenu');
-$('#fileBtn').addEventListener('click', e=>{ e.stopPropagation(); menu.classList.toggle('open'); });
+$('#fileBtn').addEventListener('click', e=>{ e.stopPropagation(); syncMenu(); menu.classList.toggle('open'); });
 document.addEventListener('click', e=>{ if(!menu.contains(e.target)) menu.classList.remove('open'); });
-menu.querySelectorAll('[data-act="open"],[data-act="create"]').forEach(b=> b.disabled = !FS_OK);
+function syncMenu(){
+  menu.querySelectorAll('[data-act="open"],[data-act="create"]').forEach(b=> b.disabled = !FS_OK);
+  menu.querySelector('[data-act="unlink"]').disabled = !fileHandle;
+  menu.querySelector('[data-act="demo"]').disabled = !!fileHandle;
+}
 menu.addEventListener('click', e=>{
   const b = e.target.closest('[data-act]'); if(!b || b.disabled) return;
   menu.classList.remove('open');
@@ -1634,30 +1766,112 @@ menu.addEventListener('click', e=>{
   if(act==='unlink') unlink();
   if(act==='export') exportJson();
   if(act==='import') $('#importInput').click();
-  if(act==='demo' && confirm('Aktuelle Daten durch Demo-Daten ersetzen?')){ state = demoData(); filter='all'; view='tasks'; openPanels.clear(); save(); renderAll(); }
+  if(act==='backups') openBackups();
+  if(act==='demo') loadDemo();
 });
 $('#importInput').addEventListener('change', async e=>{
   const f = e.target.files[0]; if(!f) return;
-  try{ state = normalize(JSON.parse(await f.text())); filter='all'; save(); renderAll(); toast(`${f.name} importiert`); }
+  try{
+    const snap = snapshotState();
+    state = normalize(JSON.parse(await f.text())); delete state.demo;
+    filter='all'; view='tasks'; openPanels.clear(); save(); renderAll();
+    undoable(`${f.name} importiert`, snap);
+  }
   catch(err){ toast('Keine gültige JSON-Datei'); }
   e.target.value = '';
 });
 $('#status').addEventListener('click', e=>{
   if(fileStatus==='needs-permission') reconnect();
-  else if(fileStatus==='none' || fileStatus==='unsupported'){ e.stopPropagation(); menu.classList.add('open'); }
+  else if(fileStatus==='error' || fileStatus==='conflict'){ flushSave(); }
+  else if(fileStatus==='none' || fileStatus==='unsupported'){ e.stopPropagation(); syncMenu(); menu.classList.add('open'); }
 });
 
 document.addEventListener('keydown', e=>{
-  if(dlg.open) return;
+  if(dlg.open || welcome.open || bakDlg.open) return;
   const typing = e.target.matches('input, select, textarea, [contenteditable]');
   if(!typing && (e.key==='n' || e.key==='N') && !e.ctrlKey && !e.metaKey && !e.altKey){ e.preventDefault(); addTask(); }
+  if(!typing && (e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='z' && lastUndo){ e.preventDefault(); lastUndo(); }
 });
 
-let toastT;
-function toast(msg){
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2800);
+let toastT, lastUndo = null;
+function toast(msg, {action=null, onAction=null, ms} = {}){
+  const t = $('#toast');
+  t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button type="button">${esc(action)}</button>` : ''}`;
+  t.classList.toggle('has-action', !!action);
+  if(action) t.querySelector('button').onclick = ()=>{ t.classList.remove('show'); onAction(); };
+  t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), ms ?? (action ? 7000 : 2800));
 }
+
+/* ---------- Rückgängig: kompletter Stand vor der Aktion ---------- */
+const snapshotState = () => JSON.stringify(state);
+function undoable(msg, snap){
+  lastUndo = ()=>{
+    lastUndo = null;
+    state = normalize(JSON.parse(snap));
+    if(filter!=='all' && filter!=='__none' && !projById(filter)) filter = 'all';
+    save(); renderAll(); toast('Rückgängig gemacht');
+  };
+  toast(msg, {action:'Rückgängig', onAction:()=> lastUndo?.()});
+}
+
+function loadDemo(){
+  if(fileHandle) return;
+  const snap = snapshotState();
+  const hadData = state.tasks.length || state.projects.length;
+  state = demoData(); filter='all'; view='tasks'; openPanels.clear(); save(); renderAll(); setStatus(FS_OK ? 'none' : 'unsupported');
+  if(hadData) undoable('Beispieldaten geladen', snap);
+  else toast('Beispieldaten geladen. Zum Start mit echten Daten: Datei, Neue JSON-Datei anlegen.', {ms:5000});
+}
+
+/* ---------- Willkommen (erster Start) ---------- */
+const welcome = $('#welcomeDlg');
+function openWelcome(){
+  welcome.querySelector('[data-wl="create"]').hidden = !FS_OK;
+  welcome.querySelector('[data-wl="open"]').hidden = !FS_OK;
+  welcome.querySelector('[data-wl="empty"]').hidden = FS_OK;
+  $('#wlNote').textContent = FS_OK ? 'Tipp: Lege die Datei in einen OneDrive-Ordner, dann ist sie automatisch gesichert.'
+    : 'Dieser Browser kann keine Dateien dauerhaft verknüpfen. Öffne die Seite in Microsoft Edge oder sichere über Datei, Als JSON herunterladen.';
+  welcome.showModal();
+}
+welcome.addEventListener('click', async e=>{
+  const b = e.target.closest('[data-wl]'); if(!b) return;
+  welcome.close();
+  const a = b.dataset.wl;
+  if(a==='create') await createFile({fresh:true});
+  if(a==='open') await openFile();
+  if(a==='demo') loadDemo();
+  if(a==='empty'){ state = emptyData(); save(); renderAll(); }
+});
+
+/* ---------- Sicherungen ---------- */
+const bakDlg = $('#bakDlg');
+function openBackups(){
+  const snaps = listSnapshots();
+  $('#bakRows').innerHTML = snaps.map(sn=>{
+    const d = normalize(readSnapshot(sn.date));
+    const op = d.tasks.filter(t=>!t.done).length, dn = d.tasks.length - op, ws = d.waits.filter(w=>w.status==='open').length;
+    const label = sn.date===today() ? 'Heute, Stand bei Tagesbeginn' : parseIso(sn.date).toLocaleDateString('de-DE',{weekday:'long', day:'2-digit', month:'2-digit', year:'numeric'});
+    return `<div class="bak-row"><div><b>${label}</b><div class="small">${op} offene Aufgaben · ${dn} erledigt · ${ws} offene Warte-Einträge · ${d.projects.length} Projekte</div></div>
+      <button class="btn btn-plain btn-sm" type="button" data-restore="${sn.date}">Wiederherstellen</button></div>`;
+  }).join('') || '<div class="w-empty">Noch keine Sicherungen. Ab heute wird jeden Tag automatisch eine angelegt.</div>';
+  bakDlg.showModal();
+}
+bakDlg.addEventListener('click', e=>{
+  if(e.target.closest('[data-close]') || e.target===bakDlg) return bakDlg.close();
+  const b = e.target.closest('[data-restore]'); if(!b) return;
+  const data = readSnapshot(b.dataset.restore); if(!data) return;
+  const snap = snapshotState();
+  state = normalize(data); delete state.demo;
+  filter = 'all'; openPanels.clear();
+  bakDlg.close(); save(); renderAll();
+  undoable(`Stand vom ${fmtShort(b.dataset.restore)} wiederhergestellt`, snap);
+});
+
+/* ---------- Fenster-Ereignisse ---------- */
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkExternal(); });
+addEventListener('focus', checkExternal);
+addEventListener('beforeunload', e=>{ if(saveTimer){ e.preventDefault(); e.returnValue = ''; } });
 
 /* =========================================================
    Konfetti (ohne externe Bibliothek, läuft auch offline)

@@ -1,4 +1,4 @@
-# Priorisierer 3000 · Plan
+# Priorisierer 3000 · Plan und Stand
 
 ## 1. Ziel
 
@@ -85,7 +85,7 @@ Die Reihenfolge im Array `tasks` ist die Priorität. Warte-Einträge hängen imm
 ### Neu in v0.2
 
 - **The One Thing**: Die oberste Aufgabe steht groß über der Liste, mit eigenem Erledigt-Knopf
-- Zähler „heute erledigt“ und **One-Thing-Serie** (wie viele Tage am Stück die One Thing erledigt wurde)
+- Zähler „heute erledigt“ (die One-Thing-Serie wurde in v1.0 wieder entfernt)
 - **Deadline** je Streifen, Karte „Nächste Deadlines“ mit Warnung, wenn etwas bald fällig ist, aber unter der Kapazitätsgrenze liegt
 - **Erledigt-Haken** mit Konfetti; bei der One Thing große Feier. Archiv-Tab „✓ Erledigt“ mit Wiederherstellen
 - Design-Review: ein gemeinsames Raster für Kopfzeile und Streifen, alle Knöpfe gleich groß und gleichmäßig verteilt, Zahlen in Inter
@@ -100,12 +100,24 @@ Die Reihenfolge im Array `tasks` ist die Priorität. Warte-Einträge hängen imm
 - **Projektübersicht** als Dialog: anlegen, umbenennen, Farbe wählen, Reihenfolge der Tabs, löschen (mit Wahl: Aufgaben verschieben, ohne Projekt behalten oder mitlöschen)
 - Weniger Emojis: Menü, Meldungen und Hinweise sind jetzt reiner Text, Symbole nur noch als schlichte Linien-Icons
 
+### v1.0: vom Prototyp zur Anwendung
+
+- **Startbildschirm** beim ersten Öffnen: neue Datei anlegen, bestehende verknüpfen oder mit Beispieldaten ausprobieren. Beispieldaten landen nie ungefragt in einer echten Datei.
+- **Rückgängig** statt Nachfragen: Löschen, Erledigen, Projekt löschen, Import und Wiederherstellen lassen sich über die Meldung oder `Strg + Z` zurücknehmen
+- **Konflikterkennung**: Wurde die Datei extern geändert (z. B. OneDrive, zweiter PC), wird nicht still überschrieben. Beim Zurückkehren ins Fenster wird ein neuerer Stand automatisch geladen.
+- **Schutz vor defekter Datei**: Ungültiges JSON wird nie überschrieben
+- **Tägliche Sicherung** im Browser, 14 Tage, mit Wiederherstellen-Dialog
+- Hinweis beim Schließen, falls noch ungespeicherte Änderungen unterwegs sind
+- One-Thing-Serie entfernt, Kachel zeigt „heute erledigt“ und „offen“
+- Anleitung in [README.md](README.md)
+
 ## 6. Iterationsplan
 
 1. ~~Mockup bewerten~~ ✓
 2. ~~Erledigt-Ablage, Deadline, One Thing~~ ✓ (v0.2)
 3. ~~Projekte verwalten~~ ✓ (v0.3)
 4. ~~„Warte auf“ mit Stichtag und Rückmeldung~~ ✓ (v0.3)
+4b. ~~Produktionsreife: Startbildschirm, Rückgängig, Konflikte, Sicherungen~~ ✓ (v1.0)
 5. **Fokusblock für die One Thing**: Zeitfenster und Timer direkt im Banner
 6. **Priorisierungshilfen**
    - Zweite Achse **Wert / Impact** (ebenfalls Fibonacci)
